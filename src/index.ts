@@ -1,11 +1,18 @@
 import { openapi } from "@elysiajs/openapi";
+import { JSONSchema } from "effect";
 import { Elysia } from "elysia";
 import { descriptionController } from "./infrastructure/description/description";
 
 const app = new Elysia();
 
 if (process.env.NODE_ENV === "development") {
-  app.use(openapi());
+  app.use(
+    openapi({
+      mapJsonSchema: {
+        effect: JSONSchema.make,
+      },
+    }),
+  );
 }
 
 app

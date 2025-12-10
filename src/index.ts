@@ -1,7 +1,6 @@
 import { openapi } from "@elysiajs/openapi";
-import { sql } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { db } from "./db";
+import { descriptionController } from "./infrastructure/description/description";
 
 const app = new Elysia();
 
@@ -11,14 +10,7 @@ if (process.env.NODE_ENV === "development") {
 
 app
   .get("/", () => "Hello Elysia")
-  .get("/health", async () => {
-    try {
-      await db.execute(sql`SELECT 1`);
-      return { status: "ok", database: "connected" };
-    } catch (e) {
-      return { status: "error", database: "disconnected", error: String(e) };
-    }
-  })
+  .use(descriptionController)
   .listen(3000);
 
 console.log(

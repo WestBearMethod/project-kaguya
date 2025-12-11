@@ -24,7 +24,10 @@ export const descriptions = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     channelId: varchar("channel_id", { length: 24 })
       .notNull()
-      .references(() => users.channelId),
+      .references(() => users.channelId, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
   },
   (table) => [index("channel_id_idx").on(table.channelId)],
 );

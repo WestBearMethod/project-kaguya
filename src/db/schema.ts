@@ -22,6 +22,7 @@ export const descriptions = pgTable(
     title: text("title").notNull(),
     content: text("content").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
     channelId: varchar("channel_id", { length: 24 })
       .notNull()
       .references(() => users.channelId, {

@@ -1,5 +1,6 @@
 import { Effect, Exit, Layer, Schema } from "effect";
 import { Elysia, t } from "elysia";
+import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
 import {
@@ -14,6 +15,7 @@ import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 export const AppLayer = Layer.mergeAll(
   SaveDescription.Live,
   GetDescriptions.Live,
+  DeleteDescription.Live,
 ).pipe(Layer.provide(DescriptionRepositoryLive));
 
 export const ErrorSchema = Schema.Struct({
@@ -21,7 +23,11 @@ export const ErrorSchema = Schema.Struct({
 });
 
 export const createDescriptionController = (
-  appLayer: Layer.Layer<SaveDescription | GetDescriptions, never, never>,
+  appLayer: Layer.Layer<
+    SaveDescription | GetDescriptions | DeleteDescription,
+    never,
+    never
+  >,
 ) =>
   new Elysia({ prefix: "/descriptions" })
     .post(
@@ -72,6 +78,33 @@ export const createDescriptionController = (
         }),
         response: {
           200: Schema.standardSchemaV1(Schema.Array(Description)),
+          500: Schema.standardSchemaV1(ErrorSchema),
+        },
+      },
+    )
+    .delete(
+      "/:id",
+      async ({ params, set }) => {
+        const result = await Effect.gen(function* () {
+          const useCase = yield* DeleteDescription;
+          return yield* useCase.execute(params.id);
+        }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
+
+        return Exit.match(result, {
+          onSuccess: (value) => value,
+          onFailure: (cause) => {
+            logErrorInProduction("DELETE /descriptions/:id error:", cause);
+            set.status = 500;
+            return { error: "Internal Server Error" };
+          },
+        });
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: Schema.standardSchemaV1(Description),
           500: Schema.standardSchemaV1(ErrorSchema),
         },
       },

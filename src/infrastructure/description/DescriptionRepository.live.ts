@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { Effect, Layer } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
@@ -35,9 +35,32 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
         const results = await db
           .select()
           .from(descriptions)
-          .where(eq(descriptions.channelId, channelId))
+          .where(
+            and(
+              eq(descriptions.channelId, channelId),
+              isNull(descriptions.deletedAt),
+            ),
+          )
           .orderBy(desc(descriptions.createdAt));
         return results as Description[];
+      },
+      catch: (error) => new Error(String(error)),
+    }),
+
+  softDelete: (id) =>
+    Effect.tryPromise({
+      try: async () => {
+        const [deleted] = await db
+          .update(descriptions)
+          .set({ deletedAt: new Date() })
+          .where(and(eq(descriptions.id, id), isNull(descriptions.deletedAt)))
+          .returning();
+
+        if (!deleted) {
+          throw new Error(`Description with id ${id} not found`);
+        }
+
+        return deleted as Description;
       },
       catch: (error) => new Error(String(error)),
     }),

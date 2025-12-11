@@ -16,6 +16,7 @@ export const Description = Schema.extend(
   Schema.Struct({
     id: Schema.UUID,
     createdAt: Schema.DateFromSelf,
+    deletedAt: Schema.NullOr(Schema.DateFromSelf),
   }),
 );
 
@@ -28,6 +29,7 @@ export const DescriptionResponse = Schema.extend(
   Schema.Struct({
     id: Schema.UUID,
     createdAt: Schema.Date, // Accepts ISO string from JSON
+    deletedAt: Schema.NullOr(Schema.Date),
   }),
 );
 

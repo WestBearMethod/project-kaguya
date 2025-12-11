@@ -1,5 +1,5 @@
 import { Context, Effect, Layer } from "effect";
-import type { Description } from "@/domain/description/Description";
+import type { DescriptionSummary } from "@/domain/description/Description";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 
 export class GetDescriptions extends Context.Tag("GetDescriptions")<
@@ -7,7 +7,7 @@ export class GetDescriptions extends Context.Tag("GetDescriptions")<
   {
     readonly execute: (
       channelId: string,
-    ) => Effect.Effect<Description[], Error>;
+    ) => Effect.Effect<DescriptionSummary[], Error>;
   }
 >() {
   static readonly Live = Layer.effect(

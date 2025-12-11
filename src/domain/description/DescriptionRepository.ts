@@ -1,5 +1,10 @@
 import { Context, type Effect } from "effect";
-import type { CreateDescription, Description } from "./Description";
+import type {
+  CreateDescription,
+  Description,
+  DescriptionContent,
+  DescriptionSummary,
+} from "./Description";
 
 export interface IDescriptionRepository {
   readonly save: (
@@ -8,7 +13,11 @@ export interface IDescriptionRepository {
 
   readonly findByChannelId: (
     channelId: string,
-  ) => Effect.Effect<Description[], Error>;
+  ) => Effect.Effect<DescriptionSummary[], Error>;
+
+  readonly findById: (
+    id: string,
+  ) => Effect.Effect<DescriptionContent | null, Error>;
 
   readonly softDelete: (id: string) => Effect.Effect<Description, Error>;
 }

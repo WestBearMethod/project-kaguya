@@ -35,3 +35,31 @@ export const DescriptionResponse = Schema.extend(
 
 export interface DescriptionResponse
   extends Schema.Schema.Type<typeof DescriptionResponse> {}
+
+// Schema for list view (summary with title and timestamp only)
+export const DescriptionSummary = Schema.Struct({
+  id: Schema.UUID,
+  title: Schema.String,
+  createdAt: Schema.DateFromSelf,
+});
+
+export interface DescriptionSummary
+  extends Schema.Schema.Type<typeof DescriptionSummary> {}
+
+// Schema for list view response (for API)
+export const DescriptionSummaryResponse = Schema.Struct({
+  id: Schema.UUID,
+  title: Schema.String,
+  createdAt: Schema.Date,
+});
+
+export interface DescriptionSummaryResponse
+  extends Schema.Schema.Type<typeof DescriptionSummaryResponse> {}
+
+// Schema for content retrieval
+export const DescriptionContent = Schema.Struct({
+  content: Schema.String,
+});
+
+export interface DescriptionContent
+  extends Schema.Schema.Type<typeof DescriptionContent> {}

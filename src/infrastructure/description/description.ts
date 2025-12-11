@@ -1,11 +1,14 @@
 import { Effect, Exit, Layer, Schema } from "effect";
 import { Elysia, t } from "elysia";
 import { DeleteDescription } from "@/application/description/deleteDescription";
+import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
 import {
   CreateDescription,
   Description,
+  DescriptionContent,
+  DescriptionSummary,
 } from "@/domain/description/Description";
 import { logErrorInProduction } from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
@@ -15,6 +18,7 @@ import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 export const AppLayer = Layer.mergeAll(
   SaveDescription.Live,
   GetDescriptions.Live,
+  GetDescriptionContent.Live,
   DeleteDescription.Live,
 ).pipe(Layer.provide(DescriptionRepositoryLive));
 
@@ -24,7 +28,10 @@ export const ErrorSchema = Schema.Struct({
 
 export const createDescriptionController = (
   appLayer: Layer.Layer<
-    SaveDescription | GetDescriptions | DeleteDescription,
+    | SaveDescription
+    | GetDescriptions
+    | GetDescriptionContent
+    | DeleteDescription,
     never,
     never
   >,
@@ -77,7 +84,41 @@ export const createDescriptionController = (
           channelId: t.String(),
         }),
         response: {
-          200: Schema.standardSchemaV1(Schema.Array(Description)),
+          200: Schema.standardSchemaV1(Schema.Array(DescriptionSummary)),
+          500: Schema.standardSchemaV1(ErrorSchema),
+        },
+      },
+    )
+    .get(
+      "/:id/content",
+      async ({ params, set }) => {
+        const result = await Effect.gen(function* () {
+          const useCase = yield* GetDescriptionContent;
+          return yield* useCase.execute(params.id);
+        }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
+
+        return Exit.match(result, {
+          onSuccess: (content) => {
+            if (!content) {
+              set.status = 404;
+              return { error: "Not found" };
+            }
+            return content;
+          },
+          onFailure: (cause) => {
+            logErrorInProduction("GET /descriptions/:id/content error:", cause);
+            set.status = 500;
+            return { error: "Internal Server Error" };
+          },
+        });
+      },
+      {
+        params: t.Object({
+          id: t.String(),
+        }),
+        response: {
+          200: Schema.standardSchemaV1(DescriptionContent),
+          404: Schema.standardSchemaV1(ErrorSchema),
           500: Schema.standardSchemaV1(ErrorSchema),
         },
       },

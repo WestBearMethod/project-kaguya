@@ -29,13 +29,13 @@ export const descriptionController = new Elysia({ prefix: "/descriptions" })
         return yield* useCase.execute(body);
       }).pipe(Effect.provide(AppLayer), Effect.runPromiseExit);
 
-      if (Exit.isSuccess(result)) {
-        return result.value;
-      } else {
-        const cause = result.cause;
-        set.status = 500;
-        return { error: "Internal Server Error", details: String(cause) };
-      }
+      return Exit.match(result, {
+        onSuccess: (value) => value,
+        onFailure: (cause) => {
+          set.status = 500;
+          return { error: "Internal Server Error", details: String(cause) };
+        },
+      });
     },
     {
       body: Schema.standardSchemaV1(CreateDescription),
@@ -53,15 +53,13 @@ export const descriptionController = new Elysia({ prefix: "/descriptions" })
         return yield* useCase.execute(query.channelId);
       }).pipe(Effect.provide(AppLayer), Effect.runPromiseExit);
 
-      if (Exit.isSuccess(result)) {
-        return result.value;
-      } else {
-        set.status = 500;
-        return {
-          error: "Internal Server Error",
-          details: String(result.cause),
-        };
-      }
+      return Exit.match(result, {
+        onSuccess: (value) => value,
+        onFailure: (cause) => {
+          set.status = 500;
+          return { error: "Internal Server Error", details: String(cause) };
+        },
+      });
     },
     {
       query: t.Object({

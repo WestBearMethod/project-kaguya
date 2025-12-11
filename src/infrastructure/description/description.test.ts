@@ -1,8 +1,15 @@
 import { describe, expect, it } from "bun:test";
-import { Effect, Schema } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
+import { GetDescriptions } from "@/application/description/getDescriptions";
+import { SaveDescription } from "@/application/description/saveDescription";
 import { DescriptionResponse } from "@/domain/description/Description";
-import { descriptionController } from "./description";
+import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
+import {
+  createDescriptionController,
+  descriptionController,
+  ErrorSchema,
+} from "./description";
 
 const BASE_URL = "http://localhost";
 
@@ -59,5 +66,64 @@ describe("Description API", () => {
     expect(Array.isArray(decoded)).toBe(true);
     expect(decoded.length).toBeGreaterThan(0);
     expect(decoded[0].title).toBe(testDescription.title);
+  });
+});
+
+describe("Description API - Error Handling", () => {
+  const FailingRepositoryLive = Layer.succeed(DescriptionRepository, {
+    save: () => Effect.fail(new Error("Database connection failed")),
+    findByChannelId: () => Effect.fail(new Error("Database connection failed")),
+  });
+
+  const FailingAppLayer = Layer.mergeAll(
+    SaveDescription.Live,
+    GetDescriptions.Live,
+  ).pipe(Layer.provide(FailingRepositoryLive));
+
+  const failingController = createDescriptionController(FailingAppLayer);
+  const testApp = new Elysia().use(failingController);
+
+  const testDescription = {
+    title: "Test Video",
+    content: "This is a test description.",
+    channelId: "UC_TEST_USER_12345678901",
+  };
+
+  it("POST /descriptions should return 500 on error without exposing details", async () => {
+    const response = await testApp.handle(
+      new Request(`${BASE_URL}/descriptions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(testDescription),
+      }),
+    );
+
+    expect(response.status).toBe(500);
+
+    const jsonData = await response.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(ErrorSchema)(jsonData),
+    );
+
+    expect(decoded.error).toBe("Internal Server Error");
+  });
+
+  it("GET /descriptions should return 500 on error without exposing details", async () => {
+    const response = await testApp.handle(
+      new Request(
+        `${BASE_URL}/descriptions?channelId=UC_TEST_USER_12345678901`,
+      ),
+    );
+
+    expect(response.status).toBe(500);
+
+    const jsonData = await response.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(ErrorSchema)(jsonData),
+    );
+
+    expect(decoded.error).toBe("Internal Server Error");
   });
 });

@@ -6,6 +6,7 @@ import {
   CreateDescription,
   Description,
 } from "@/domain/description/Description";
+import { logErrorInProduction } from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
 // Compose the full application layer
@@ -15,60 +16,65 @@ export const AppLayer = Layer.mergeAll(
   GetDescriptions.Live,
 ).pipe(Layer.provide(DescriptionRepositoryLive));
 
-const ErrorSchema = Schema.Struct({
+export const ErrorSchema = Schema.Struct({
   error: Schema.String,
 });
 
-export const descriptionController = new Elysia({ prefix: "/descriptions" })
-  .post(
-    "/",
-    async ({ body, set }) => {
-      const result = await Effect.gen(function* () {
-        const useCase = yield* SaveDescription;
-        return yield* useCase.execute(body);
-      }).pipe(Effect.provide(AppLayer), Effect.runPromiseExit);
+export const createDescriptionController = (
+  appLayer: Layer.Layer<SaveDescription | GetDescriptions, never, never>,
+) =>
+  new Elysia({ prefix: "/descriptions" })
+    .post(
+      "/",
+      async ({ body, set }) => {
+        const result = await Effect.gen(function* () {
+          const useCase = yield* SaveDescription;
+          return yield* useCase.execute(body);
+        }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
-      return Exit.match(result, {
-        onSuccess: (value) => value,
-        onFailure: (cause) => {
-          Effect.runSync(Effect.logError("POST /descriptions error:", cause));
-          set.status = 500;
-          return { error: "Internal Server Error" };
-        },
-      });
-    },
-    {
-      body: Schema.standardSchemaV1(CreateDescription),
-      response: {
-        200: Schema.standardSchemaV1(Description),
-        500: Schema.standardSchemaV1(ErrorSchema),
+        return Exit.match(result, {
+          onSuccess: (value) => value,
+          onFailure: (cause) => {
+            logErrorInProduction("POST /descriptions error:", cause);
+            set.status = 500;
+            return { error: "Internal Server Error" };
+          },
+        });
       },
-    },
-  )
-  .get(
-    "/",
-    async ({ query, set }) => {
-      const result = await Effect.gen(function* () {
-        const useCase = yield* GetDescriptions;
-        return yield* useCase.execute(query.channelId);
-      }).pipe(Effect.provide(AppLayer), Effect.runPromiseExit);
+      {
+        body: Schema.standardSchemaV1(CreateDescription),
+        response: {
+          200: Schema.standardSchemaV1(Description),
+          500: Schema.standardSchemaV1(ErrorSchema),
+        },
+      },
+    )
+    .get(
+      "/",
+      async ({ query, set }) => {
+        const result = await Effect.gen(function* () {
+          const useCase = yield* GetDescriptions;
+          return yield* useCase.execute(query.channelId);
+        }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
-      return Exit.match(result, {
-        onSuccess: (value) => value,
-        onFailure: (cause) => {
-          Effect.runSync(Effect.logError("GET /descriptions error:", cause));
-          set.status = 500;
-          return { error: "Internal Server Error" };
-        },
-      });
-    },
-    {
-      query: t.Object({
-        channelId: t.String(),
-      }),
-      response: {
-        200: Schema.standardSchemaV1(Schema.Array(Description)),
-        500: Schema.standardSchemaV1(ErrorSchema),
+        return Exit.match(result, {
+          onSuccess: (value) => value,
+          onFailure: (cause) => {
+            logErrorInProduction("GET /descriptions error:", cause);
+            set.status = 500;
+            return { error: "Internal Server Error" };
+          },
+        });
       },
-    },
-  );
+      {
+        query: t.Object({
+          channelId: t.String(),
+        }),
+        response: {
+          200: Schema.standardSchemaV1(Schema.Array(Description)),
+          500: Schema.standardSchemaV1(ErrorSchema),
+        },
+      },
+    );
+
+export const descriptionController = createDescriptionController(AppLayer);

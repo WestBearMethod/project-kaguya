@@ -17,7 +17,6 @@ export const AppLayer = Layer.mergeAll(
 
 const ErrorSchema = Schema.Struct({
   error: Schema.String,
-  details: Schema.String,
 });
 
 export const descriptionController = new Elysia({ prefix: "/descriptions" })
@@ -32,8 +31,9 @@ export const descriptionController = new Elysia({ prefix: "/descriptions" })
       return Exit.match(result, {
         onSuccess: (value) => value,
         onFailure: (cause) => {
+          Effect.runSync(Effect.logError("POST /descriptions error:", cause));
           set.status = 500;
-          return { error: "Internal Server Error", details: String(cause) };
+          return { error: "Internal Server Error" };
         },
       });
     },
@@ -56,8 +56,9 @@ export const descriptionController = new Elysia({ prefix: "/descriptions" })
       return Exit.match(result, {
         onSuccess: (value) => value,
         onFailure: (cause) => {
+          Effect.runSync(Effect.logError("GET /descriptions error:", cause));
           set.status = 500;
-          return { error: "Internal Server Error", details: String(cause) };
+          return { error: "Internal Server Error" };
         },
       });
     },

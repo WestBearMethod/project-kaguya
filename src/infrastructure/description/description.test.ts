@@ -161,7 +161,7 @@ describe("Description API - Soft Delete", () => {
     channelId: testUser.channelId,
   };
 
-  it("DELETE /descriptions/:id should soft delete a description", async () => {
+  const createTestDescription = async () => {
     const createResponse = await testApp.handle(
       new Request(`${BASE_URL}/descriptions`, {
         method: "POST",
@@ -174,9 +174,13 @@ describe("Description API - Soft Delete", () => {
 
     expect(createResponse.status).toBe(200);
     const createdData = await createResponse.json();
-    const created = await Effect.runPromise(
+    return Effect.runPromise(
       Schema.decodeUnknown(DescriptionResponse)(createdData),
     );
+  };
+
+  it("DELETE /descriptions/:id should soft delete a description", async () => {
+    const created = await createTestDescription();
 
     const deleteResponse = await testApp.handle(
       new Request(`${BASE_URL}/descriptions/${created.id}`, {
@@ -195,20 +199,7 @@ describe("Description API - Soft Delete", () => {
   });
 
   it("GET /descriptions should not return soft-deleted descriptions", async () => {
-    const createResponse = await testApp.handle(
-      new Request(`${BASE_URL}/descriptions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(testDescription),
-      }),
-    );
-
-    const createdData = await createResponse.json();
-    const created = await Effect.runPromise(
-      Schema.decodeUnknown(DescriptionResponse)(createdData),
-    );
+    const created = await createTestDescription();
 
     await testApp.handle(
       new Request(`${BASE_URL}/descriptions/${created.id}`, {
@@ -228,5 +219,30 @@ describe("Description API - Soft Delete", () => {
 
     const foundDeleted = descriptions.find((d) => d.id === created.id);
     expect(foundDeleted).toBeUndefined();
+  });
+
+  it("DELETE /descriptions/:id should return 500 when trying to delete an already deleted description", async () => {
+    const created = await createTestDescription();
+
+    await testApp.handle(
+      new Request(`${BASE_URL}/descriptions/${created.id}`, {
+        method: "DELETE",
+      }),
+    );
+
+    const secondDeleteResponse = await testApp.handle(
+      new Request(`${BASE_URL}/descriptions/${created.id}`, {
+        method: "DELETE",
+      }),
+    );
+
+    expect(secondDeleteResponse.status).toBe(500);
+
+    const jsonData = await secondDeleteResponse.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(ErrorSchema)(jsonData),
+    );
+
+    expect(decoded.error).toBe("Internal Server Error");
   });
 });

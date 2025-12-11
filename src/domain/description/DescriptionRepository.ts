@@ -9,6 +9,8 @@ export interface IDescriptionRepository {
   readonly findByChannelId: (
     channelId: string,
   ) => Effect.Effect<Description[], Error>;
+
+  readonly softDelete: (id: string) => Effect.Effect<Description, Error>;
 }
 
 export class DescriptionRepository extends Context.Tag("DescriptionRepository")<

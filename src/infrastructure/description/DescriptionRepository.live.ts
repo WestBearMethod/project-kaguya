@@ -53,7 +53,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
         const [deleted] = await db
           .update(descriptions)
           .set({ deletedAt: new Date() })
-          .where(eq(descriptions.id, id))
+          .where(and(eq(descriptions.id, id), isNull(descriptions.deletedAt)))
           .returning();
 
         if (!deleted) {

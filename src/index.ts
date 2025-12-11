@@ -1,24 +1,25 @@
 import { openapi } from "@elysiajs/openapi";
-import { sql } from "drizzle-orm";
+import { JSONSchema } from "effect";
 import { Elysia } from "elysia";
-import { db } from "./db";
+import { descriptionController } from "./infrastructure/description/description";
+import { healthController } from "./infrastructure/health/health";
 
 const app = new Elysia();
 
 if (process.env.NODE_ENV === "development") {
-  app.use(openapi());
+  app.use(
+    openapi({
+      mapJsonSchema: {
+        effect: JSONSchema.make,
+      },
+    }),
+  );
 }
 
 app
   .get("/", () => "Hello Elysia")
-  .get("/health", async () => {
-    try {
-      await db.execute(sql`SELECT 1`);
-      return { status: "ok", database: "connected" };
-    } catch (e) {
-      return { status: "error", database: "disconnected", error: String(e) };
-    }
-  })
+  .use(healthController)
+  .use(descriptionController)
   .listen(3000);
 
 console.log(

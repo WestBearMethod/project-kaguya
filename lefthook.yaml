@@ -7,3 +7,5 @@ pre-commit:
       stage_fixed: true
     check:
       run: bun run tsc --noEmit
+    test:
+      run: bun run test

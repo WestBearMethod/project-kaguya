@@ -6,6 +6,7 @@ import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
 import {
   CreateDescription,
+  DeleteDescriptionRequest,
   Description,
   DescriptionContent,
   DescriptionContentRequest,
@@ -124,10 +125,10 @@ export const createDescriptionController = (
     )
     .delete(
       "/:id",
-      async ({ params, set }) => {
+      async ({ params, body, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* DeleteDescription;
-          return yield* useCase.execute(params.id);
+          return yield* useCase.execute(params.id, body.channelId);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -143,6 +144,7 @@ export const createDescriptionController = (
         params: t.Object({
           id: t.String(),
         }),
+        body: Schema.standardSchemaV1(DeleteDescriptionRequest),
         response: {
           200: Schema.standardSchemaV1(Description),
           500: Schema.standardSchemaV1(ErrorSchema),

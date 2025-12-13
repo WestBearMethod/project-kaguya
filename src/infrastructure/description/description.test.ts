@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { Chunk, Effect, Layer, Option, Schema } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
 import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
@@ -113,17 +113,16 @@ describe("Description API", () => {
 
     expect(response.status).toBe(200);
 
-    // Use Schema.decodeUnknown to parse and validate the response as a Chunk
     const jsonData = await response.json();
     const decoded = await Effect.runPromise(
-      Schema.decodeUnknown(Schema.Chunk(DescriptionSummary))(jsonData),
+      Schema.decodeUnknown(Schema.Array(DescriptionSummary))(jsonData),
     );
 
-    expect(Chunk.isChunk(decoded)).toBe(true);
+    expect(Array.isArray(decoded)).toBe(true);
     expect(decoded.length).toBeGreaterThan(0);
-    expect(Chunk.unsafeGet(decoded, 0).title).toBe(testDescription.title);
-    expect(Chunk.unsafeGet(decoded, 0).id).toBeDefined();
-    expect(Chunk.unsafeGet(decoded, 0).createdAt).toBeDefined();
+    expect(decoded[0].title).toBe(testDescription.title);
+    expect(decoded[0].id).toBeDefined();
+    expect(decoded[0].createdAt).toBeDefined();
   });
 });
 
@@ -241,12 +240,10 @@ describe("Description API - Soft Delete", () => {
     expect(getResponse.status).toBe(200);
     const getData = await getResponse.json();
     const descriptions = await Effect.runPromise(
-      Schema.decodeUnknown(Schema.Chunk(DescriptionSummary))(getData),
+      Schema.decodeUnknown(Schema.Array(DescriptionSummary))(getData),
     );
 
-    const foundDeleted = Option.getOrUndefined(
-      Chunk.findFirst(descriptions, (d) => d.id === created.id),
-    );
+    const foundDeleted = descriptions.find((d) => d.id === created.id);
     expect(foundDeleted).toBeUndefined();
   });
 

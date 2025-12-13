@@ -121,7 +121,7 @@ describe("Description API - Error Handling", () => {
     save: () => Effect.fail(new Error("Database connection failed")),
     findByChannelId: () => Effect.fail(new Error("Database connection failed")),
     findById: () => Effect.fail(new Error("Database connection failed")),
-    softDelete: (_id, _channelId) =>
+    softDelete: (_command) =>
       Effect.fail(new Error("Database connection failed")),
   });
 
@@ -181,7 +181,10 @@ describe("Description API - Error Handling", () => {
 
   it("DELETE /descriptions/:id should return 500 on error without exposing details", async () => {
     const response = await testApp.handle(
-      createDeleteRequest("some-uuid-here", testUser.channelId),
+      createDeleteRequest(
+        "00000000-0000-0000-0000-000000000000",
+        testUser.channelId,
+      ),
     );
 
     expect(response.status).toBe(500);

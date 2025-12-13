@@ -9,13 +9,14 @@ const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
   }),
 );
 
-const channelId = Schema.String.pipe(Schema.length(24));
+export const DescriptionId = Schema.UUID;
+export const ChannelId = Schema.String.pipe(Schema.length(24));
 
 // Schema for creating a description (id and createdAt are generated)
 export const CreateDescription = Schema.Struct({
   title: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100)),
   content: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(5000)),
-  channelId: channelId,
+  channelId: ChannelId,
 });
 
 export interface CreateDescription
@@ -25,7 +26,7 @@ export interface CreateDescription
 export const Description = Schema.extend(
   CreateDescription,
   Schema.Struct({
-    id: Schema.UUID,
+    id: DescriptionId,
     createdAt: AnnotatedDateFromSelf,
     deletedAt: Schema.NullOr(AnnotatedDateFromSelf),
   }),
@@ -36,7 +37,7 @@ export interface Description extends Schema.Schema.Type<typeof Description> {}
 
 // Schema for list view (summary with title and timestamp only)
 export const DescriptionSummary = Schema.Struct({
-  id: Schema.UUID,
+  id: DescriptionId,
   title: Schema.String,
   createdAt: AnnotatedDateFromSelf,
 });
@@ -44,31 +45,10 @@ export const DescriptionSummary = Schema.Struct({
 export interface DescriptionSummary
   extends Schema.Schema.Type<typeof DescriptionSummary> {}
 
-export const DescriptionContentRequest = Schema.Struct({
-  id: Schema.UUID,
-});
-
-export interface DescriptionContentRequest
-  extends Schema.Schema.Type<typeof DescriptionContentRequest> {}
-
 // Schema for content retrieval
 export const DescriptionContent = Schema.Struct({
   content: Schema.String,
 });
 
 export interface DescriptionContent
-  extends Schema.Schema.Type<typeof DescriptionContent> {} // Request schema for delete operation
-
-export const DeleteDescriptionRequest = Schema.Struct({
-  channelId: channelId,
-});
-
-export interface DeleteDescriptionRequest
-  extends Schema.Schema.Type<typeof DeleteDescriptionRequest> {}
-
-export const GetDescriptionsRequest = Schema.Struct({
-  channelId: channelId,
-});
-
-export interface GetDescriptionsRequest
-  extends Schema.Schema.Type<typeof GetDescriptionsRequest> {}
+  extends Schema.Schema.Type<typeof DescriptionContent> {}

@@ -1,18 +1,21 @@
 import { Effect, Exit, Layer, Schema } from "effect";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
 import {
   CreateDescription,
-  DeleteDescriptionRequest,
   Description,
   DescriptionContent,
-  DescriptionContentRequest,
   DescriptionSummary,
-  GetDescriptionsRequest,
 } from "@/domain/description/Description";
+import {
+  DeleteDescriptionBody,
+  DeleteDescriptionParams,
+  GetDescriptionContentQuery,
+  GetDescriptionsQuery,
+} from "@/domain/description/DescriptionRepository";
 import { logErrorInProduction } from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
@@ -70,7 +73,7 @@ export const createDescriptionController = (
       async ({ query, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* GetDescriptions;
-          return yield* useCase.execute(query.channelId);
+          return yield* useCase.execute(query);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -83,7 +86,7 @@ export const createDescriptionController = (
         });
       },
       {
-        query: Schema.standardSchemaV1(GetDescriptionsRequest),
+        query: Schema.standardSchemaV1(GetDescriptionsQuery),
         response: {
           200: Schema.standardSchemaV1(Schema.Array(DescriptionSummary)),
           500: Schema.standardSchemaV1(ErrorSchema),
@@ -95,7 +98,7 @@ export const createDescriptionController = (
       async ({ params, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* GetDescriptionContent;
-          return yield* useCase.execute(params.id);
+          return yield* useCase.execute(params);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -114,7 +117,7 @@ export const createDescriptionController = (
         });
       },
       {
-        params: Schema.standardSchemaV1(DescriptionContentRequest),
+        params: Schema.standardSchemaV1(GetDescriptionContentQuery),
         response: {
           200: Schema.standardSchemaV1(DescriptionContent),
           404: Schema.standardSchemaV1(ErrorSchema),
@@ -127,7 +130,10 @@ export const createDescriptionController = (
       async ({ params, body, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* DeleteDescription;
-          return yield* useCase.execute(params.id, body.channelId);
+          return yield* useCase.execute({
+            id: params.id,
+            channelId: body.channelId,
+          });
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -140,10 +146,8 @@ export const createDescriptionController = (
         });
       },
       {
-        params: t.Object({
-          id: t.String(),
-        }),
-        body: Schema.standardSchemaV1(DeleteDescriptionRequest),
+        params: Schema.standardSchemaV1(DeleteDescriptionParams),
+        body: Schema.standardSchemaV1(DeleteDescriptionBody),
         response: {
           200: Schema.standardSchemaV1(Description),
           500: Schema.standardSchemaV1(ErrorSchema),

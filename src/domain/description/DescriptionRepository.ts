@@ -1,10 +1,52 @@
-import { Context, type Effect } from "effect";
-import type {
-  CreateDescription,
-  Description,
-  DescriptionContent,
-  DescriptionSummary,
+import { Context, type Effect, Schema } from "effect";
+import {
+  ChannelId,
+  type CreateDescription,
+  type Description,
+  type DescriptionContent,
+  DescriptionId,
+  type DescriptionSummary,
 } from "./Description";
+
+// CQRS Pattern: Query for retrieving descriptions
+export const GetDescriptionsQuery = Schema.Struct({
+  channelId: ChannelId,
+});
+
+export interface GetDescriptionsQuery
+  extends Schema.Schema.Type<typeof GetDescriptionsQuery> {}
+
+// CQRS Pattern: Query for retrieving description content
+export const GetDescriptionContentQuery = Schema.Struct({
+  id: DescriptionId,
+});
+
+export interface GetDescriptionContentQuery
+  extends Schema.Schema.Type<typeof GetDescriptionContentQuery> {}
+
+// CQRS Pattern: Command for deleting a description
+export const DeleteDescriptionCommand = Schema.Struct({
+  id: DescriptionId,
+  channelId: ChannelId,
+});
+
+export interface DeleteDescriptionCommand
+  extends Schema.Schema.Type<typeof DeleteDescriptionCommand> {}
+
+export const DeleteDescriptionParams = Schema.Struct({
+  id: DescriptionId,
+});
+
+export interface DeleteDescriptionParams
+  extends Schema.Schema.Type<typeof DeleteDescriptionParams> {}
+
+// HTTP Body schema for delete operation (excludes id which comes from params)
+export const DeleteDescriptionBody = Schema.Struct({
+  channelId: ChannelId,
+});
+
+export interface DeleteDescriptionBody
+  extends Schema.Schema.Type<typeof DeleteDescriptionBody> {}
 
 export interface IDescriptionRepository {
   readonly save: (
@@ -12,16 +54,15 @@ export interface IDescriptionRepository {
   ) => Effect.Effect<Description, Error>;
 
   readonly findByChannelId: (
-    channelId: string,
+    query: GetDescriptionsQuery,
   ) => Effect.Effect<DescriptionSummary[], Error>;
 
   readonly findById: (
-    id: string,
+    query: GetDescriptionContentQuery,
   ) => Effect.Effect<DescriptionContent | null, Error>;
 
   readonly softDelete: (
-    id: string,
-    channelId: string,
+    command: DeleteDescriptionCommand,
   ) => Effect.Effect<Description, Error>;
 }
 

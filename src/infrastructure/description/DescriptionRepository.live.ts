@@ -70,17 +70,23 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
       catch: (error) => new Error(String(error)),
     }),
 
-  softDelete: (id) =>
+  softDelete: (id, channelId) =>
     Effect.tryPromise({
       try: async () => {
         const [deleted] = await db
           .update(descriptions)
           .set({ deletedAt: new Date() })
-          .where(and(eq(descriptions.id, id), isNull(descriptions.deletedAt)))
+          .where(
+            and(
+              eq(descriptions.id, id),
+              eq(descriptions.channelId, channelId),
+              isNull(descriptions.deletedAt),
+            ),
+          )
           .returning();
 
         if (!deleted) {
-          throw new Error(`Description with id ${id} not found`);
+          throw new Error("Description not found or not owned by user");
         }
 
         return deleted as Description;

@@ -5,7 +5,10 @@ import { DescriptionRepository } from "@/domain/description/DescriptionRepositor
 export class DeleteDescription extends Context.Tag("DeleteDescription")<
   DeleteDescription,
   {
-    readonly execute: (id: string) => Effect.Effect<Description, Error>;
+    readonly execute: (
+      id: string,
+      channelId: string,
+    ) => Effect.Effect<Description, Error>;
   }
 >() {
   static readonly Live = Layer.effect(
@@ -13,7 +16,8 @@ export class DeleteDescription extends Context.Tag("DeleteDescription")<
     Effect.gen(function* () {
       const repository = yield* DescriptionRepository;
       return {
-        execute: (id: string) => repository.softDelete(id),
+        execute: (id: string, channelId: string) =>
+          repository.softDelete(id, channelId),
       };
     }),
   );

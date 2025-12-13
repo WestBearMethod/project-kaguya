@@ -1,5 +1,5 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Option } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
@@ -67,7 +67,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             and(eq(descriptions.id, query.id), isNull(descriptions.deletedAt)),
           )
           .limit(1);
-        return result ? (result as DescriptionContent) : null;
+        return Option.fromNullable(result as DescriptionContent | undefined);
       },
       catch: (error) => new Error(String(error)),
     }),

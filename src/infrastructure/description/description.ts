@@ -1,4 +1,4 @@
-import { Effect, Exit, Layer, Schema } from "effect";
+import { Effect, Exit, Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
@@ -107,13 +107,14 @@ export const createDescriptionController = (
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
-          onSuccess: (content) => {
-            if (!content) {
-              set.status = 404;
-              return { error: "Not found" };
-            }
-            return content;
-          },
+          onSuccess: (optionContent) =>
+            Option.match(optionContent, {
+              onSome: (content) => content,
+              onNone: () => {
+                set.status = 404;
+                return { error: "Not found" };
+              },
+            }),
           onFailure: (cause) => {
             logErrorInProduction("GET /descriptions/:id/content error:", cause);
             set.status = 500;

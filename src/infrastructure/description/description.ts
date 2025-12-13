@@ -1,4 +1,4 @@
-import { Effect, Exit, Layer, Option, Schema } from "effect";
+import { Chunk, Effect, Exit, Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
@@ -79,7 +79,11 @@ export const createDescriptionController = (
         const result = await Effect.gen(function* () {
           const useCase = yield* GetDescriptions;
           return yield* useCase.execute(query);
-        }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
+        }).pipe(
+          Effect.map(Chunk.toReadonlyArray),
+          Effect.provide(appLayer),
+          Effect.runPromiseExit,
+        );
 
         return Exit.match(result, {
           onSuccess: (value) => value,

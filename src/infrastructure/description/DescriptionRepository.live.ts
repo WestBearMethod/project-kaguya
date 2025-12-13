@@ -5,9 +5,9 @@ import { descriptions, users } from "@/db/schema";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import {
   DescriptionContent,
-  type DescriptionSummary,
+  DescriptionSummary,
 } from "@/domain/description/dtos";
-import type { Description } from "@/domain/description/entities";
+import { Description } from "@/domain/description/entities";
 
 export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
   save: (command) =>
@@ -28,10 +28,13 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
           })
           .returning();
 
-        return saved as Description;
+        return saved;
       },
       catch: (error) => new Error(String(error)),
-    }),
+    }).pipe(
+      Effect.flatMap(Schema.decodeUnknown(Description)),
+      Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
+    ),
 
   findByChannelId: (query) =>
     Effect.tryPromise({
@@ -50,10 +53,13 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             ),
           )
           .orderBy(desc(descriptions.createdAt));
-        return results as DescriptionSummary[];
+        return results;
       },
       catch: (error) => new Error(String(error)),
-    }),
+    }).pipe(
+      Effect.flatMap(Schema.decodeUnknown(Schema.Chunk(DescriptionSummary))),
+      Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
+    ),
 
   findById: (query) =>
     Effect.tryPromise({
@@ -103,8 +109,11 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
           throw new Error("Description not found or not owned by user");
         }
 
-        return deleted as Description;
+        return deleted;
       },
       catch: (error) => new Error(String(error)),
-    }),
+    }).pipe(
+      Effect.flatMap(Schema.decodeUnknown(Description)),
+      Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
+    ),
 });

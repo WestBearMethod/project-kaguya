@@ -1,6 +1,7 @@
 # リポジトリの内容
 
 プログラミング実務未経験者が Google Antigravity を利用し、以下の動画内容のアプリケーションを実装したものです。  
+現時点では以下の動画内容までの実装を終えているつもりです。  
 https://youtu.be/lJaHSbygvTM
 
 ## 使用技術スタック
@@ -36,6 +37,22 @@ https://effect.website/docs
 そして、Exit 型の値を扱うには `Exit.match` を使用します。  
 このパターンマッチにより、成功型と失敗型で処理を分岐させ、それぞれの値を用いた処理を実行しています。  
 今回の例でいうと 分岐先で HTTP ステータスコード 200 と 500 の値を返す処理を実行しています。
+
+## 設計思想
+
+型安全、仕様変更に耐え得るアプリケーションを目指しています。  
+そのために、
+
+- HTTP リクエスト
+- HTTP レスポンス
+- データベース通信
+
+といった IO 処理を行うアプリケーションの境界にて Effect.Schema を用いて型安全な値のみを取得、送信するようにしています。  
+このおかげでアプリケーション内部では保証された型の値のみを扱います。  
+よって意図しない値が渡されることを防ぎ、エラー発生を抑制できていると思います。
+
+Clean Architecture のようにドメインレイヤーを中心とする単一方向への依存関係を守ることで、ドメインに変更がない限り各レイヤーのみのリファクタリングも容易になっていると考えています。  
+値オブジェクトを定義することで、コマンドやクエリ関数に渡す引数も自然に仕様に従い、仕様変更が発生しても値オブジェクトの定義を変更すればそれに対応した部分も自動的に変更が適用されていると思います。
 
 ## セットアップ
 
@@ -101,9 +118,17 @@ https://github.com/WestBearMethod/project-kaguya/blob/2af503a099e2a482dafda70236
 ### Effect.schema を用いて HTTP リクエスト、レスポンスを安全に処理するために必要なコード
 
 Elysia が受け取った HTTP リクエストを自動的に型安全な値に変換します。  
-また、返す HTTP レスポンスを自動的に JSON 形式に変換します。  https://github.com/WestBearMethod/project-kaguya/blob/2af503a099e2a482dafda70236cca8cce662fa22/src/infrastructure/description/description.ts
+また、返す HTTP レスポンスを自動的に JSON 形式に変換します。  
+https://github.com/WestBearMethod/project-kaguya/blob/2af503a099e2a482dafda70236cca8cce662fa22/src/infrastructure/description/description.ts
 
 他にも Effect 外で Effect 型でラップされた値を利用するために Effect.runPromiseExit を使用し Exit 型に変換し、パターンマッチで値をアンラップしています。
+
+## データベース通信実行時の戻り値を型安全にするために必要なコード
+
+データベース通信によって取得した値は Effect.Schema のデコードを実行して型安全な値に変換します。  
+https://github.com/WestBearMethod/project-kaguya/pull/16/commits/40a86aee51301ed9ce428b5ab60f8a94cbe554b8
+
+https://github.com/WestBearMethod/project-kaguya/pull/16/commits/30f57ddc6ab5159b56f8744c06b72a9ad5bd428f
 
 ### 成功型を返す処理と失敗型を返す処理をテストコードで保証する
 

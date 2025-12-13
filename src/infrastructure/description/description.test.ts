@@ -5,11 +5,11 @@ import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
+import { DescriptionContent } from "@/domain/description/Description";
 import {
-  DescriptionContent,
   DescriptionResponse,
   DescriptionSummaryResponse,
-} from "@/domain/description/Description";
+} from "@/domain/description/Description.test.response";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import {
   createDescriptionController,

@@ -23,19 +23,6 @@ export const Description = Schema.extend(
 // Type definition inferred from schema
 export interface Description extends Schema.Schema.Type<typeof Description> {}
 
-// Schema for JSON Response (Date is serialized to ISO string)
-export const DescriptionResponse = Schema.extend(
-  CreateDescription,
-  Schema.Struct({
-    id: Schema.UUID,
-    createdAt: Schema.Date, // Accepts ISO string from JSON
-    deletedAt: Schema.NullOr(Schema.Date),
-  }),
-);
-
-export interface DescriptionResponse
-  extends Schema.Schema.Type<typeof DescriptionResponse> {}
-
 // Schema for list view (summary with title and timestamp only)
 export const DescriptionSummary = Schema.Struct({
   id: Schema.UUID,
@@ -45,16 +32,6 @@ export const DescriptionSummary = Schema.Struct({
 
 export interface DescriptionSummary
   extends Schema.Schema.Type<typeof DescriptionSummary> {}
-
-// Schema for list view response (for API)
-export const DescriptionSummaryResponse = Schema.Struct({
-  id: Schema.UUID,
-  title: Schema.String,
-  createdAt: Schema.Date,
-});
-
-export interface DescriptionSummaryResponse
-  extends Schema.Schema.Type<typeof DescriptionSummaryResponse> {}
 
 // Schema for content retrieval
 export const DescriptionContent = Schema.Struct({

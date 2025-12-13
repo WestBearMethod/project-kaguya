@@ -8,12 +8,12 @@ import { SaveDescription } from "@/application/description/saveDescription";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import {
   DescriptionContent,
-  DescriptionSummary,
+  DescriptionSummary as DescriptionSummaryActual,
 } from "@/domain/description/dtos";
-import { Description } from "@/domain/description/entities";
+import { Description as DescriptionActual } from "@/domain/description/entities";
 import {
-  dateFieldForTest,
-  nullableDateFieldForTest,
+  replaceDateForTest,
+  replaceNullableDateForTest,
 } from "@/test-utils/schema";
 import {
   createDescriptionController,
@@ -23,16 +23,13 @@ import {
 
 const BASE_URL = "http://localhost";
 
-const DescriptionResponse = Description.pipe(
-  Schema.omit("createdAt"),
-  Schema.extend(dateFieldForTest("createdAt")),
-  Schema.omit("deletedAt"),
-  Schema.extend(nullableDateFieldForTest("deletedAt")),
+const Description = DescriptionActual.pipe(
+  replaceDateForTest("createdAt"),
+  replaceNullableDateForTest("deletedAt"),
 );
 
-const DescriptionSummaryResponse = DescriptionSummary.pipe(
-  Schema.omit("createdAt"),
-  Schema.extend(dateFieldForTest("createdAt")),
+const DescriptionSummary = DescriptionSummaryActual.pipe(
+  replaceDateForTest("createdAt"),
 );
 
 const testUser = {
@@ -59,9 +56,7 @@ const createTestDescription = async () => {
 
   expect(createResponse.status).toBe(200);
   const createdData = await createResponse.json();
-  return Effect.runPromise(
-    Schema.decodeUnknown(DescriptionResponse)(createdData),
-  );
+  return Effect.runPromise(Schema.decodeUnknown(Description)(createdData));
 };
 
 const createDeleteRequest = (id: string, channelId: string) => {
@@ -103,7 +98,7 @@ describe("Description API", () => {
     // Use Schema.decodeUnknown to parse and validate the response
     const jsonData = await response.json();
     const decoded = await Effect.runPromise(
-      Schema.decodeUnknown(DescriptionResponse)(jsonData),
+      Schema.decodeUnknown(Description)(jsonData),
     );
 
     expect(decoded.id).toBeDefined();
@@ -121,7 +116,7 @@ describe("Description API", () => {
     // Use Schema.decodeUnknown to parse and validate the response as an array
     const jsonData = await response.json();
     const decoded = await Effect.runPromise(
-      Schema.decodeUnknown(Schema.Array(DescriptionSummaryResponse))(jsonData),
+      Schema.decodeUnknown(Schema.Array(DescriptionSummary))(jsonData),
     );
 
     expect(Array.isArray(decoded)).toBe(true);
@@ -227,7 +222,7 @@ describe("Description API - Soft Delete", () => {
     expect(deleteResponse.status).toBe(200);
     const deletedData = await deleteResponse.json();
     const deleted = await Effect.runPromise(
-      Schema.decodeUnknown(DescriptionResponse)(deletedData),
+      Schema.decodeUnknown(Description)(deletedData),
     );
 
     expect(deleted.id).toBe(created.id);
@@ -246,7 +241,7 @@ describe("Description API - Soft Delete", () => {
     expect(getResponse.status).toBe(200);
     const getData = await getResponse.json();
     const descriptions = await Effect.runPromise(
-      Schema.decodeUnknown(Schema.Array(DescriptionSummaryResponse))(getData),
+      Schema.decodeUnknown(Schema.Array(DescriptionSummary))(getData),
     );
 
     const foundDeleted = descriptions.find((d) => d.id === created.id);

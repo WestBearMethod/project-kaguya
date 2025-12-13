@@ -2,29 +2,29 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { Effect, Layer } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
+import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import type {
-  Description,
   DescriptionContent,
   DescriptionSummary,
-} from "@/domain/description/Description";
-import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
+} from "@/domain/description/dtos";
+import type { Description } from "@/domain/description/entities";
 
 export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
-  save: (descriptionData) =>
+  save: (command) =>
     Effect.tryPromise({
       try: async () => {
         // Ensure user exists
         await db
           .insert(users)
-          .values({ channelId: descriptionData.channelId })
+          .values({ channelId: command.channelId })
           .onConflictDoNothing({ target: users.channelId });
 
         const [saved] = await db
           .insert(descriptions)
           .values({
-            title: descriptionData.title,
-            content: descriptionData.content,
-            channelId: descriptionData.channelId,
+            title: command.title,
+            content: command.content,
+            channelId: command.channelId,
           })
           .returning();
 
@@ -33,7 +33,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
       catch: (error) => new Error(String(error)),
     }),
 
-  findByChannelId: (channelId) =>
+  findByChannelId: (query) =>
     Effect.tryPromise({
       try: async () => {
         const results = await db
@@ -45,7 +45,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
           .from(descriptions)
           .where(
             and(
-              eq(descriptions.channelId, channelId),
+              eq(descriptions.channelId, query.channelId),
               isNull(descriptions.deletedAt),
             ),
           )
@@ -55,7 +55,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
       catch: (error) => new Error(String(error)),
     }),
 
-  findById: (id) =>
+  findById: (query) =>
     Effect.tryPromise({
       try: async () => {
         const [result] = await db
@@ -63,14 +63,16 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             content: descriptions.content,
           })
           .from(descriptions)
-          .where(and(eq(descriptions.id, id), isNull(descriptions.deletedAt)))
+          .where(
+            and(eq(descriptions.id, query.id), isNull(descriptions.deletedAt)),
+          )
           .limit(1);
         return result ? (result as DescriptionContent) : null;
       },
       catch: (error) => new Error(String(error)),
     }),
 
-  softDelete: (id, channelId) =>
+  softDelete: (command) =>
     Effect.tryPromise({
       try: async () => {
         const [deleted] = await db
@@ -78,8 +80,8 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
           .set({ deletedAt: new Date() })
           .where(
             and(
-              eq(descriptions.id, id),
-              eq(descriptions.channelId, channelId),
+              eq(descriptions.id, command.id),
+              eq(descriptions.channelId, command.channelId),
               isNull(descriptions.deletedAt),
             ),
           )

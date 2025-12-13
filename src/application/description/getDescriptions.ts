@@ -1,12 +1,13 @@
 import { Context, Effect, Layer } from "effect";
-import type { DescriptionSummary } from "@/domain/description/Description";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
+import type { DescriptionSummary } from "@/domain/description/dtos";
+import type { GetDescriptionsQuery } from "@/domain/description/queries";
 
 export class GetDescriptions extends Context.Tag("GetDescriptions")<
   GetDescriptions,
   {
     readonly execute: (
-      channelId: string,
+      query: GetDescriptionsQuery,
     ) => Effect.Effect<DescriptionSummary[], Error>;
   }
 >() {
@@ -15,7 +16,8 @@ export class GetDescriptions extends Context.Tag("GetDescriptions")<
     Effect.gen(function* () {
       const repository = yield* DescriptionRepository;
       return {
-        execute: (channelId: string) => repository.findByChannelId(channelId),
+        execute: (query: GetDescriptionsQuery) =>
+          repository.findByChannelId(query),
       };
     }),
   );

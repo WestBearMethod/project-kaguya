@@ -1,27 +1,30 @@
 import { Context, type Effect } from "effect";
 import type {
-  CreateDescription,
-  Description,
-  DescriptionContent,
-  DescriptionSummary,
-} from "./Description";
+  CreateDescriptionCommand,
+  DeleteDescriptionCommand,
+} from "./commands";
+import type { DescriptionContent, DescriptionSummary } from "./dtos";
+import type { Description } from "./entities";
+import type {
+  GetDescriptionContentQuery,
+  GetDescriptionsQuery,
+} from "./queries";
 
 export interface IDescriptionRepository {
   readonly save: (
-    description: CreateDescription,
+    command: CreateDescriptionCommand,
   ) => Effect.Effect<Description, Error>;
 
   readonly findByChannelId: (
-    channelId: string,
+    query: GetDescriptionsQuery,
   ) => Effect.Effect<DescriptionSummary[], Error>;
 
   readonly findById: (
-    id: string,
+    query: GetDescriptionContentQuery,
   ) => Effect.Effect<DescriptionContent | null, Error>;
 
   readonly softDelete: (
-    id: string,
-    channelId: string,
+    command: DeleteDescriptionCommand,
   ) => Effect.Effect<Description, Error>;
 }
 

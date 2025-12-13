@@ -6,6 +6,6 @@ pre-commit:
       run: bunx biome check --write {staged_files}
       stage_fixed: true
     check:
-      run: bun run tsc --noEmit
+      run: bun run check-types
     test:
       run: bun run test

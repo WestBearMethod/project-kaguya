@@ -9,11 +9,13 @@ const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
   }),
 );
 
+const channelId = Schema.String.pipe(Schema.length(24));
+
 // Schema for creating a description (id and createdAt are generated)
 export const CreateDescription = Schema.Struct({
   title: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100)),
   content: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(5000)),
-  channelId: Schema.String.pipe(Schema.length(24)),
+  channelId: channelId,
 });
 
 export interface CreateDescription
@@ -58,8 +60,15 @@ export interface DescriptionContent
   extends Schema.Schema.Type<typeof DescriptionContent> {} // Request schema for delete operation
 
 export const DeleteDescriptionRequest = Schema.Struct({
-  channelId: Schema.String,
+  channelId: channelId,
 });
 
 export interface DeleteDescriptionRequest
   extends Schema.Schema.Type<typeof DeleteDescriptionRequest> {}
+
+export const GetDescriptionsRequest = Schema.Struct({
+  channelId: channelId,
+});
+
+export interface GetDescriptionsRequest
+  extends Schema.Schema.Type<typeof GetDescriptionsRequest> {}

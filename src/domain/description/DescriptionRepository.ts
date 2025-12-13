@@ -1,11 +1,16 @@
 import { Context, type Effect, Schema } from "effect";
-import type {
-  CreateDescriptionCommand,
-  DescriptionContent,
-  DescriptionSummary,
-} from "./dtos";
-import type { Description } from "./entities";
+import type { DescriptionContent, DescriptionSummary } from "./dtos";
+import { Description } from "./entities";
 import { ChannelId, DescriptionId } from "./valueObjects";
+
+// CQRS Pattern: Command for creating a description
+// Derived from Description entity by omitting server-generated fields
+export const CreateDescriptionCommand = Description.pipe(
+  Schema.omit("id", "createdAt", "deletedAt"),
+);
+
+export interface CreateDescriptionCommand
+  extends Schema.Schema.Type<typeof CreateDescriptionCommand> {}
 
 // CQRS Pattern: Query for retrieving descriptions
 export const GetDescriptionsQuery = Schema.Struct({

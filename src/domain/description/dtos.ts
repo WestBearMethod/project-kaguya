@@ -1,6 +1,5 @@
 import { Schema } from "effect";
 import { AnnotatedDateFromSelf } from "@/domain/shared/primitives";
-import { Description } from "./entities";
 import {
   DescriptionContentText,
   DescriptionId,
@@ -11,15 +10,6 @@ import {
  * DTOs (Data Transfer Objects): Schemas for data transfer across layers
  * These are derived from the Description entity and represent different views/operations
  */
-
-// CQRS Pattern: Command for creating a description
-// Derived from Description entity by omitting server-generated fields
-export const CreateDescriptionCommand = Description.pipe(
-  Schema.omit("id", "createdAt", "deletedAt"),
-);
-
-export interface CreateDescriptionCommand
-  extends Schema.Schema.Type<typeof CreateDescriptionCommand> {}
 
 // Schema for list view (summary with title and timestamp only)
 export const DescriptionSummary = Schema.Struct({

@@ -8,6 +8,7 @@ import {
   CreateDescription,
   Description,
   DescriptionContent,
+  DescriptionContentRequest,
   DescriptionSummary,
 } from "@/domain/description/Description";
 import { logErrorInProduction } from "@/infrastructure/logger";
@@ -113,9 +114,7 @@ export const createDescriptionController = (
         });
       },
       {
-        params: t.Object({
-          id: t.String(),
-        }),
+        params: Schema.standardSchemaV1(DescriptionContentRequest),
         response: {
           200: Schema.standardSchemaV1(DescriptionContent),
           404: Schema.standardSchemaV1(ErrorSchema),

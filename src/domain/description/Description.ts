@@ -33,6 +33,13 @@ export const DescriptionSummary = Schema.Struct({
 export interface DescriptionSummary
   extends Schema.Schema.Type<typeof DescriptionSummary> {}
 
+export const DescriptionContentRequest = Schema.Struct({
+  id: Schema.UUID,
+});
+
+export interface DescriptionContentRequest
+  extends Schema.Schema.Type<typeof DescriptionContentRequest> {}
+
 // Schema for content retrieval
 export const DescriptionContent = Schema.Struct({
   content: Schema.String,

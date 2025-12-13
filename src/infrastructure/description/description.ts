@@ -11,6 +11,7 @@ import {
   DescriptionContent,
   DescriptionContentRequest,
   DescriptionSummary,
+  GetDescriptionsRequest,
 } from "@/domain/description/Description";
 import { logErrorInProduction } from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
@@ -82,9 +83,7 @@ export const createDescriptionController = (
         });
       },
       {
-        query: t.Object({
-          channelId: t.String(),
-        }),
+        query: Schema.standardSchemaV1(GetDescriptionsRequest),
         response: {
           200: Schema.standardSchemaV1(Schema.Array(DescriptionSummary)),
           500: Schema.standardSchemaV1(ErrorSchema),

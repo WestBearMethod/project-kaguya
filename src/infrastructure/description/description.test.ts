@@ -256,7 +256,7 @@ describe("Description API - Soft Delete", () => {
   it("DELETE /descriptions/:id should return 500 when deleting with different channelId (not owned)", async () => {
     const created = await createTestDescription();
 
-    const differentChannelId = "UC_DIFFERENT_USER_999";
+    const differentChannelId = "UC_DIFFERENT_USER_999999";
 
     const deleteResponse = await testApp.handle(
       createDeleteRequest(created.id, differentChannelId),

@@ -113,7 +113,6 @@ describe("Description API", () => {
 
     expect(response.status).toBe(200);
 
-    // Use Schema.decodeUnknown to parse and validate the response as an array
     const jsonData = await response.json();
     const decoded = await Effect.runPromise(
       Schema.decodeUnknown(Schema.Array(DescriptionSummary))(jsonData),

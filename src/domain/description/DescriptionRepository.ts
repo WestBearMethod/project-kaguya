@@ -1,4 +1,4 @@
-import { Context, type Effect } from "effect";
+import { type Chunk, Context, type Effect, type Option } from "effect";
 import type {
   CreateDescriptionCommand,
   DeleteDescriptionCommand,
@@ -17,11 +17,11 @@ export interface IDescriptionRepository {
 
   readonly findByChannelId: (
     query: GetDescriptionsQuery,
-  ) => Effect.Effect<DescriptionSummary[], Error>;
+  ) => Effect.Effect<Chunk.Chunk<DescriptionSummary>, Error>;
 
   readonly findById: (
     query: GetDescriptionContentQuery,
-  ) => Effect.Effect<DescriptionContent | null, Error>;
+  ) => Effect.Effect<Option.Option<DescriptionContent>, Error>;
 
   readonly softDelete: (
     command: DeleteDescriptionCommand,

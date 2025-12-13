@@ -5,12 +5,16 @@ import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
-import {
-  DescriptionResponse,
-  DescriptionSummaryResponse,
-} from "@/domain/description/Description.test.response";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
-import { DescriptionContent } from "@/domain/description/dtos";
+import {
+  DescriptionContent,
+  DescriptionSummary,
+} from "@/domain/description/dtos";
+import { Description } from "@/domain/description/entities";
+import {
+  dateFieldForTest,
+  nullableDateFieldForTest,
+} from "@/test-utils/schema";
 import {
   createDescriptionController,
   descriptionController,
@@ -18,6 +22,18 @@ import {
 } from "./description";
 
 const BASE_URL = "http://localhost";
+
+const DescriptionResponse = Description.pipe(
+  Schema.omit("createdAt"),
+  Schema.extend(dateFieldForTest("createdAt")),
+  Schema.omit("deletedAt"),
+  Schema.extend(nullableDateFieldForTest("deletedAt")),
+);
+
+const DescriptionSummaryResponse = DescriptionSummary.pipe(
+  Schema.omit("createdAt"),
+  Schema.extend(dateFieldForTest("createdAt")),
+);
 
 const testUser = {
   channelId: "UC_DELETE_USER_123456789",

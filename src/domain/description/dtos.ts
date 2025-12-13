@@ -1,19 +1,11 @@
 import { Schema } from "effect";
+import { AnnotatedDateFromSelf } from "@/domain/shared/primitives";
 import { Description } from "./entities";
 import {
   DescriptionContentText,
   DescriptionId,
   DescriptionTitle,
 } from "./valueObjects";
-
-const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
-  Schema.annotations({
-    jsonSchema: {
-      type: "string",
-      format: "date-time", // ISO 8601 形式を示す
-    },
-  }),
-);
 
 /**
  * DTOs (Data Transfer Objects): Schemas for data transfer across layers

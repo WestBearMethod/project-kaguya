@@ -1,11 +1,11 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
-import { Effect, Layer, Option } from "effect";
+import { Effect, Layer, Option, Schema } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
-import type {
+import {
   DescriptionContent,
-  DescriptionSummary,
+  type DescriptionSummary,
 } from "@/domain/description/dtos";
 import type { Description } from "@/domain/description/entities";
 
@@ -67,10 +67,22 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             and(eq(descriptions.id, query.id), isNull(descriptions.deletedAt)),
           )
           .limit(1);
-        return Option.fromNullable(result as DescriptionContent | undefined);
+        return Option.fromNullable(result);
       },
       catch: (error) => new Error(String(error)),
-    }),
+    }).pipe(
+      Effect.flatMap((option) =>
+        Option.match(option, {
+          onNone: () => Effect.succeed(Option.none()),
+          onSome: (content) =>
+            Effect.map(
+              Schema.decodeUnknown(DescriptionContent)(content),
+              Option.some,
+            ),
+        }),
+      ),
+      Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
+    ),
 
   softDelete: (command) =>
     Effect.tryPromise({

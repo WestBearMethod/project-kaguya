@@ -1,9 +1,7 @@
 import { Context, Effect, Layer } from "effect";
-import {
-  DescriptionRepository,
-  type GetDescriptionContentQuery,
-} from "@/domain/description/DescriptionRepository";
+import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import type { DescriptionContent } from "@/domain/description/dtos";
+import type { GetDescriptionContentQuery } from "@/domain/description/queries";
 
 export class GetDescriptionContent extends Context.Tag("GetDescriptionContent")<
   GetDescriptionContent,

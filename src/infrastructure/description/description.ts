@@ -5,17 +5,22 @@ import { GetDescriptionContent } from "@/application/description/getDescriptionC
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
 import {
-  DeleteDescriptionBody,
-  DeleteDescriptionParams,
-  GetDescriptionContentQuery,
-  GetDescriptionsQuery,
-} from "@/domain/description/DescriptionRepository";
-import {
   CreateDescriptionCommand,
+  type DeleteDescriptionCommand,
+} from "@/domain/description/commands";
+import {
   DescriptionContent,
   DescriptionSummary,
 } from "@/domain/description/dtos";
 import { Description } from "@/domain/description/entities";
+import {
+  GetDescriptionContentQuery,
+  GetDescriptionsQuery,
+} from "@/domain/description/queries";
+import {
+  DeleteDescriptionBody,
+  DeleteDescriptionParams,
+} from "@/infrastructure/description/requests";
 import { logErrorInProduction } from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
@@ -130,10 +135,11 @@ export const createDescriptionController = (
       async ({ params, body, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* DeleteDescription;
-          return yield* useCase.execute({
+          const command: DeleteDescriptionCommand = {
             id: params.id,
             channelId: body.channelId,
-          });
+          };
+          return yield* useCase.execute(command);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {

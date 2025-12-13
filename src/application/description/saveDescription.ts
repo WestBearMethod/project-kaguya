@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
+import type { CreateDescriptionCommand } from "@/domain/description/commands";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
-import type { CreateDescriptionCommand } from "@/domain/description/dtos";
 import type { Description } from "@/domain/description/entities";
 
 export class SaveDescription extends Context.Tag("SaveDescription")<

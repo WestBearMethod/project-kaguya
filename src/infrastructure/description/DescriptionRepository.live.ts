@@ -2,29 +2,29 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { Effect, Layer } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
+import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import type {
-  Description,
   DescriptionContent,
   DescriptionSummary,
-} from "@/domain/description/Description";
-import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
+} from "@/domain/description/dtos";
+import type { Description } from "@/domain/description/entities";
 
 export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
-  save: (descriptionData) =>
+  save: (command) =>
     Effect.tryPromise({
       try: async () => {
         // Ensure user exists
         await db
           .insert(users)
-          .values({ channelId: descriptionData.channelId })
+          .values({ channelId: command.channelId })
           .onConflictDoNothing({ target: users.channelId });
 
         const [saved] = await db
           .insert(descriptions)
           .values({
-            title: descriptionData.title,
-            content: descriptionData.content,
-            channelId: descriptionData.channelId,
+            title: command.title,
+            content: command.content,
+            channelId: command.channelId,
           })
           .returning();
 

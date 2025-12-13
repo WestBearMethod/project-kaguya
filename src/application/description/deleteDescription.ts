@@ -1,9 +1,9 @@
 import { Context, Effect, Layer } from "effect";
-import type { Description } from "@/domain/description/Description";
 import {
   type DeleteDescriptionCommand,
   DescriptionRepository,
 } from "@/domain/description/DescriptionRepository";
+import type { Description } from "@/domain/description/entities";
 
 export class DeleteDescription extends Context.Tag("DeleteDescription")<
   DeleteDescription,

@@ -1,15 +1,13 @@
 import { Context, Effect, Layer } from "effect";
-import type {
-  CreateDescription,
-  Description,
-} from "@/domain/description/Description";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
+import type { CreateDescriptionCommand } from "@/domain/description/dtos";
+import type { Description } from "@/domain/description/entities";
 
 export class SaveDescription extends Context.Tag("SaveDescription")<
   SaveDescription,
   {
     readonly execute: (
-      data: CreateDescription,
+      command: CreateDescriptionCommand,
     ) => Effect.Effect<Description, Error>;
   }
 >() {
@@ -18,7 +16,8 @@ export class SaveDescription extends Context.Tag("SaveDescription")<
     Effect.gen(function* () {
       const repository = yield* DescriptionRepository;
       return {
-        execute: (data: CreateDescription) => repository.save(data),
+        execute: (command: CreateDescriptionCommand) =>
+          repository.save(command),
       };
     }),
   );

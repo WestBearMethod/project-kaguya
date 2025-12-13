@@ -5,17 +5,17 @@ import { GetDescriptionContent } from "@/application/description/getDescriptionC
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
 import {
-  CreateDescription,
-  Description,
-  DescriptionContent,
-  DescriptionSummary,
-} from "@/domain/description/Description";
-import {
   DeleteDescriptionBody,
   DeleteDescriptionParams,
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
 } from "@/domain/description/DescriptionRepository";
+import {
+  CreateDescriptionCommand,
+  DescriptionContent,
+  DescriptionSummary,
+} from "@/domain/description/dtos";
+import { Description } from "@/domain/description/entities";
 import { logErrorInProduction } from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
@@ -61,7 +61,7 @@ export const createDescriptionController = (
         });
       },
       {
-        body: Schema.standardSchemaV1(CreateDescription),
+        body: Schema.standardSchemaV1(CreateDescriptionCommand),
         response: {
           200: Schema.standardSchemaV1(Description),
           500: Schema.standardSchemaV1(ErrorSchema),

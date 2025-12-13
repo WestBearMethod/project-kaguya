@@ -1,10 +1,11 @@
 import { Schema } from "effect";
-import { CreateDescription } from "./Description";
+import { CreateDescriptionCommand } from "./dtos";
+import { DescriptionId, DescriptionTitle } from "./valueObjects";
 
 export const DescriptionResponse = Schema.extend(
-  CreateDescription,
+  CreateDescriptionCommand,
   Schema.Struct({
-    id: Schema.UUID,
+    id: DescriptionId,
     createdAt: Schema.Date,
     deletedAt: Schema.NullOr(Schema.Date),
   }),
@@ -14,8 +15,8 @@ export interface DescriptionResponse
   extends Schema.Schema.Type<typeof DescriptionResponse> {}
 
 export const DescriptionSummaryResponse = Schema.Struct({
-  id: Schema.UUID,
-  title: Schema.String,
+  id: DescriptionId,
+  title: DescriptionTitle,
   createdAt: Schema.Date,
 });
 

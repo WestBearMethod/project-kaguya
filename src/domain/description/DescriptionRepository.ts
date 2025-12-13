@@ -1,12 +1,11 @@
 import { Context, type Effect, Schema } from "effect";
-import {
-  ChannelId,
-  type CreateDescription,
-  type Description,
-  type DescriptionContent,
-  DescriptionId,
-  type DescriptionSummary,
-} from "./Description";
+import type {
+  CreateDescriptionCommand,
+  DescriptionContent,
+  DescriptionSummary,
+} from "./dtos";
+import type { Description } from "./entities";
+import { ChannelId, DescriptionId } from "./valueObjects";
 
 // CQRS Pattern: Query for retrieving descriptions
 export const GetDescriptionsQuery = Schema.Struct({
@@ -50,7 +49,7 @@ export interface DeleteDescriptionBody
 
 export interface IDescriptionRepository {
   readonly save: (
-    description: CreateDescription,
+    command: CreateDescriptionCommand,
   ) => Effect.Effect<Description, Error>;
 
   readonly findByChannelId: (

@@ -32,15 +32,6 @@ export const DeleteDescriptionCommand = Schema.Struct({
 export interface DeleteDescriptionCommand
   extends Schema.Schema.Type<typeof DeleteDescriptionCommand> {}
 
-export const DeleteDescriptionParams = Schema.Struct({
-  id: DescriptionId,
-});
-
-// HTTP Body schema for delete operation (excludes id which comes from params)
-export const DeleteDescriptionBody = Schema.Struct({
-  channelId: ChannelId,
-});
-
 export interface IDescriptionRepository {
   readonly save: (
     command: CreateDescriptionCommand,

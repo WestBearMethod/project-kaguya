@@ -2,7 +2,11 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { Effect, Layer } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
-import type { Description } from "@/domain/description/Description";
+import type {
+  Description,
+  DescriptionContent,
+  DescriptionSummary,
+} from "@/domain/description/Description";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 
 export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
@@ -33,7 +37,11 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
     Effect.tryPromise({
       try: async () => {
         const results = await db
-          .select()
+          .select({
+            id: descriptions.id,
+            title: descriptions.title,
+            createdAt: descriptions.createdAt,
+          })
           .from(descriptions)
           .where(
             and(
@@ -42,7 +50,22 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             ),
           )
           .orderBy(desc(descriptions.createdAt));
-        return results as Description[];
+        return results as DescriptionSummary[];
+      },
+      catch: (error) => new Error(String(error)),
+    }),
+
+  findById: (id) =>
+    Effect.tryPromise({
+      try: async () => {
+        const [result] = await db
+          .select({
+            content: descriptions.content,
+          })
+          .from(descriptions)
+          .where(and(eq(descriptions.id, id), isNull(descriptions.deletedAt)))
+          .limit(1);
+        return result ? (result as DescriptionContent) : null;
       },
       catch: (error) => new Error(String(error)),
     }),

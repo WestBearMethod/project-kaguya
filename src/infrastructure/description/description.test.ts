@@ -2,9 +2,14 @@ import { describe, expect, it } from "bun:test";
 import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
 import { DeleteDescription } from "@/application/description/deleteDescription";
+import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
-import { DescriptionResponse } from "@/domain/description/Description";
+import { DescriptionContent } from "@/domain/description/Description";
+import {
+  DescriptionResponse,
+  DescriptionSummaryResponse,
+} from "@/domain/description/Description.test.response";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import {
   createDescriptionController,
@@ -13,6 +18,35 @@ import {
 } from "./description";
 
 const BASE_URL = "http://localhost";
+
+const testUser = {
+  channelId: "UC_DELETE_USER_123456789",
+};
+
+const testDescription = {
+  title: "Test Video for Deletion",
+  content: "This description will be soft deleted.",
+  channelId: testUser.channelId,
+};
+
+const createTestDescription = async () => {
+  const testApp = new Elysia().use(descriptionController);
+  const createResponse = await testApp.handle(
+    new Request(`${BASE_URL}/descriptions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(testDescription),
+    }),
+  );
+
+  expect(createResponse.status).toBe(200);
+  const createdData = await createResponse.json();
+  return Effect.runPromise(
+    Schema.decodeUnknown(DescriptionResponse)(createdData),
+  );
+};
 
 describe("Description API", () => {
   const testApp = new Elysia().use(descriptionController);
@@ -61,12 +95,14 @@ describe("Description API", () => {
     // Use Schema.decodeUnknown to parse and validate the response as an array
     const jsonData = await response.json();
     const decoded = await Effect.runPromise(
-      Schema.decodeUnknown(Schema.Array(DescriptionResponse))(jsonData),
+      Schema.decodeUnknown(Schema.Array(DescriptionSummaryResponse))(jsonData),
     );
 
     expect(Array.isArray(decoded)).toBe(true);
     expect(decoded.length).toBeGreaterThan(0);
     expect(decoded[0].title).toBe(testDescription.title);
+    expect(decoded[0].id).toBeDefined();
+    expect(decoded[0].createdAt).toBeDefined();
   });
 });
 
@@ -74,12 +110,14 @@ describe("Description API - Error Handling", () => {
   const FailingRepositoryLive = Layer.succeed(DescriptionRepository, {
     save: () => Effect.fail(new Error("Database connection failed")),
     findByChannelId: () => Effect.fail(new Error("Database connection failed")),
+    findById: () => Effect.fail(new Error("Database connection failed")),
     softDelete: () => Effect.fail(new Error("Database connection failed")),
   });
 
   const FailingAppLayer = Layer.mergeAll(
     SaveDescription.Live,
     GetDescriptions.Live,
+    GetDescriptionContent.Live,
     DeleteDescription.Live,
   ).pipe(Layer.provide(FailingRepositoryLive));
 
@@ -151,34 +189,6 @@ describe("Description API - Error Handling", () => {
 describe("Description API - Soft Delete", () => {
   const testApp = new Elysia().use(descriptionController);
 
-  const testUser = {
-    channelId: "UC_DELETE_USER_123456789",
-  };
-
-  const testDescription = {
-    title: "Test Video for Deletion",
-    content: "This description will be soft deleted.",
-    channelId: testUser.channelId,
-  };
-
-  const createTestDescription = async () => {
-    const createResponse = await testApp.handle(
-      new Request(`${BASE_URL}/descriptions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(testDescription),
-      }),
-    );
-
-    expect(createResponse.status).toBe(200);
-    const createdData = await createResponse.json();
-    return Effect.runPromise(
-      Schema.decodeUnknown(DescriptionResponse)(createdData),
-    );
-  };
-
   it("DELETE /descriptions/:id should soft delete a description", async () => {
     const created = await createTestDescription();
 
@@ -214,7 +224,7 @@ describe("Description API - Soft Delete", () => {
     expect(getResponse.status).toBe(200);
     const getData = await getResponse.json();
     const descriptions = await Effect.runPromise(
-      Schema.decodeUnknown(Schema.Array(DescriptionResponse))(getData),
+      Schema.decodeUnknown(Schema.Array(DescriptionSummaryResponse))(getData),
     );
 
     const foundDeleted = descriptions.find((d) => d.id === created.id);
@@ -244,5 +254,66 @@ describe("Description API - Soft Delete", () => {
     );
 
     expect(decoded.error).toBe("Internal Server Error");
+  });
+});
+
+describe("Description API - Get Content", () => {
+  const testApp = new Elysia().use(descriptionController);
+
+  it("GET /descriptions/:id/content should return content", async () => {
+    const created = await createTestDescription();
+
+    const response = await testApp.handle(
+      new Request(`${BASE_URL}/descriptions/${created.id}/content`),
+    );
+
+    expect(response.status).toBe(200);
+
+    const jsonData = await response.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(DescriptionContent)(jsonData),
+    );
+
+    expect(decoded.content).toBe(testDescription.content);
+  });
+
+  it("GET /descriptions/:id/content should return 404 for non-existent description", async () => {
+    const fakeId = "00000000-0000-0000-0000-000000000000";
+
+    const response = await testApp.handle(
+      new Request(`${BASE_URL}/descriptions/${fakeId}/content`),
+    );
+
+    expect(response.status).toBe(404);
+
+    const jsonData = await response.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(ErrorSchema)(jsonData),
+    );
+
+    expect(decoded.error).toBe("Not found");
+  });
+
+  it("GET /descriptions/:id/content should return 404 for soft-deleted description", async () => {
+    const created = await createTestDescription();
+
+    await testApp.handle(
+      new Request(`${BASE_URL}/descriptions/${created.id}`, {
+        method: "DELETE",
+      }),
+    );
+
+    const response = await testApp.handle(
+      new Request(`${BASE_URL}/descriptions/${created.id}/content`),
+    );
+
+    expect(response.status).toBe(404);
+
+    const jsonData = await response.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(ErrorSchema)(jsonData),
+    );
+
+    expect(decoded.error).toBe("Not found");
   });
 });

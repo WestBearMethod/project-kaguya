@@ -1,5 +1,14 @@
 import { Schema } from "effect";
 
+const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
+  Schema.annotations({
+    jsonSchema: {
+      type: "string",
+      format: "date-time", // ISO 8601 形式を示す
+    },
+  }),
+);
+
 // Schema for creating a description (id and createdAt are generated)
 export const CreateDescription = Schema.Struct({
   title: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100)),
@@ -15,23 +24,35 @@ export const Description = Schema.extend(
   CreateDescription,
   Schema.Struct({
     id: Schema.UUID,
-    createdAt: Schema.DateFromSelf,
-    deletedAt: Schema.NullOr(Schema.DateFromSelf),
+    createdAt: AnnotatedDateFromSelf,
+    deletedAt: Schema.NullOr(AnnotatedDateFromSelf),
   }),
 );
 
 // Type definition inferred from schema
 export interface Description extends Schema.Schema.Type<typeof Description> {}
 
-// Schema for JSON Response (Date is serialized to ISO string)
-export const DescriptionResponse = Schema.extend(
-  CreateDescription,
-  Schema.Struct({
-    id: Schema.UUID,
-    createdAt: Schema.Date, // Accepts ISO string from JSON
-    deletedAt: Schema.NullOr(Schema.Date),
-  }),
-);
+// Schema for list view (summary with title and timestamp only)
+export const DescriptionSummary = Schema.Struct({
+  id: Schema.UUID,
+  title: Schema.String,
+  createdAt: AnnotatedDateFromSelf,
+});
 
-export interface DescriptionResponse
-  extends Schema.Schema.Type<typeof DescriptionResponse> {}
+export interface DescriptionSummary
+  extends Schema.Schema.Type<typeof DescriptionSummary> {}
+
+export const DescriptionContentRequest = Schema.Struct({
+  id: Schema.UUID,
+});
+
+export interface DescriptionContentRequest
+  extends Schema.Schema.Type<typeof DescriptionContentRequest> {}
+
+// Schema for content retrieval
+export const DescriptionContent = Schema.Struct({
+  content: Schema.String,
+});
+
+export interface DescriptionContent
+  extends Schema.Schema.Type<typeof DescriptionContent> {}

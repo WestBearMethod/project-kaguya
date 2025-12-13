@@ -1,5 +1,14 @@
 import { Schema } from "effect";
 
+const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
+  Schema.annotations({
+    jsonSchema: {
+      type: "string",
+      format: "date-time", // ISO 8601 形式を示す
+    },
+  }),
+);
+
 // Schema for creating a description (id and createdAt are generated)
 export const CreateDescription = Schema.Struct({
   title: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100)),
@@ -15,8 +24,8 @@ export const Description = Schema.extend(
   CreateDescription,
   Schema.Struct({
     id: Schema.UUID,
-    createdAt: Schema.DateFromSelf,
-    deletedAt: Schema.NullOr(Schema.DateFromSelf),
+    createdAt: AnnotatedDateFromSelf,
+    deletedAt: Schema.NullOr(AnnotatedDateFromSelf),
   }),
 );
 
@@ -27,7 +36,7 @@ export interface Description extends Schema.Schema.Type<typeof Description> {}
 export const DescriptionSummary = Schema.Struct({
   id: Schema.UUID,
   title: Schema.String,
-  createdAt: Schema.DateFromSelf,
+  createdAt: AnnotatedDateFromSelf,
 });
 
 export interface DescriptionSummary

@@ -19,6 +19,35 @@ import {
 
 const BASE_URL = "http://localhost";
 
+const testUser = {
+  channelId: "UC_DELETE_USER_123456789",
+};
+
+const testDescription = {
+  title: "Test Video for Deletion",
+  content: "This description will be soft deleted.",
+  channelId: testUser.channelId,
+};
+
+const createTestDescription = async () => {
+  const testApp = new Elysia().use(descriptionController);
+  const createResponse = await testApp.handle(
+    new Request(`${BASE_URL}/descriptions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(testDescription),
+    }),
+  );
+
+  expect(createResponse.status).toBe(200);
+  const createdData = await createResponse.json();
+  return Effect.runPromise(
+    Schema.decodeUnknown(DescriptionResponse)(createdData),
+  );
+};
+
 describe("Description API", () => {
   const testApp = new Elysia().use(descriptionController);
 
@@ -160,34 +189,6 @@ describe("Description API - Error Handling", () => {
 describe("Description API - Soft Delete", () => {
   const testApp = new Elysia().use(descriptionController);
 
-  const testUser = {
-    channelId: "UC_DELETE_USER_123456789",
-  };
-
-  const testDescription = {
-    title: "Test Video for Deletion",
-    content: "This description will be soft deleted.",
-    channelId: testUser.channelId,
-  };
-
-  const createTestDescription = async () => {
-    const createResponse = await testApp.handle(
-      new Request(`${BASE_URL}/descriptions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(testDescription),
-      }),
-    );
-
-    expect(createResponse.status).toBe(200);
-    const createdData = await createResponse.json();
-    return Effect.runPromise(
-      Schema.decodeUnknown(DescriptionResponse)(createdData),
-    );
-  };
-
   it("DELETE /descriptions/:id should soft delete a description", async () => {
     const created = await createTestDescription();
 
@@ -258,30 +259,6 @@ describe("Description API - Soft Delete", () => {
 
 describe("Description API - Get Content", () => {
   const testApp = new Elysia().use(descriptionController);
-
-  const testDescription = {
-    title: "Test Video for Content",
-    content: "This is the content we want to retrieve.",
-    channelId: "UC_CONTENT_USER_12345678",
-  };
-
-  const createTestDescription = async () => {
-    const createResponse = await testApp.handle(
-      new Request(`${BASE_URL}/descriptions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(testDescription),
-      }),
-    );
-
-    expect(createResponse.status).toBe(200);
-    const createdData = await createResponse.json();
-    return Effect.runPromise(
-      Schema.decodeUnknown(DescriptionResponse)(createdData),
-    );
-  };
 
   it("GET /descriptions/:id/content should return content", async () => {
     const created = await createTestDescription();

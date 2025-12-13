@@ -48,6 +48,16 @@ const createTestDescription = async () => {
   );
 };
 
+const createDeleteRequest = (id: string, channelId: string) => {
+  return new Request(`${BASE_URL}/descriptions/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ channelId }),
+  });
+};
+
 describe("Description API", () => {
   const testApp = new Elysia().use(descriptionController);
 
@@ -111,7 +121,8 @@ describe("Description API - Error Handling", () => {
     save: () => Effect.fail(new Error("Database connection failed")),
     findByChannelId: () => Effect.fail(new Error("Database connection failed")),
     findById: () => Effect.fail(new Error("Database connection failed")),
-    softDelete: () => Effect.fail(new Error("Database connection failed")),
+    softDelete: (_id, _channelId) =>
+      Effect.fail(new Error("Database connection failed")),
   });
 
   const FailingAppLayer = Layer.mergeAll(
@@ -170,9 +181,7 @@ describe("Description API - Error Handling", () => {
 
   it("DELETE /descriptions/:id should return 500 on error without exposing details", async () => {
     const response = await testApp.handle(
-      new Request(`${BASE_URL}/descriptions/some-uuid-here`, {
-        method: "DELETE",
-      }),
+      createDeleteRequest("some-uuid-here", testUser.channelId),
     );
 
     expect(response.status).toBe(500);
@@ -193,9 +202,7 @@ describe("Description API - Soft Delete", () => {
     const created = await createTestDescription();
 
     const deleteResponse = await testApp.handle(
-      new Request(`${BASE_URL}/descriptions/${created.id}`, {
-        method: "DELETE",
-      }),
+      createDeleteRequest(created.id, testUser.channelId),
     );
 
     expect(deleteResponse.status).toBe(200);
@@ -211,11 +218,7 @@ describe("Description API - Soft Delete", () => {
   it("GET /descriptions should not return soft-deleted descriptions", async () => {
     const created = await createTestDescription();
 
-    await testApp.handle(
-      new Request(`${BASE_URL}/descriptions/${created.id}`, {
-        method: "DELETE",
-      }),
-    );
+    await testApp.handle(createDeleteRequest(created.id, testUser.channelId));
 
     const getResponse = await testApp.handle(
       new Request(`${BASE_URL}/descriptions?channelId=${testUser.channelId}`),
@@ -234,21 +237,57 @@ describe("Description API - Soft Delete", () => {
   it("DELETE /descriptions/:id should return 500 when trying to delete an already deleted description", async () => {
     const created = await createTestDescription();
 
-    await testApp.handle(
-      new Request(`${BASE_URL}/descriptions/${created.id}`, {
-        method: "DELETE",
-      }),
-    );
+    await testApp.handle(createDeleteRequest(created.id, testUser.channelId));
 
     const secondDeleteResponse = await testApp.handle(
-      new Request(`${BASE_URL}/descriptions/${created.id}`, {
-        method: "DELETE",
-      }),
+      createDeleteRequest(created.id, testUser.channelId),
     );
 
     expect(secondDeleteResponse.status).toBe(500);
 
     const jsonData = await secondDeleteResponse.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(ErrorSchema)(jsonData),
+    );
+
+    expect(decoded.error).toBe("Internal Server Error");
+  });
+
+  it("DELETE /descriptions/:id should return 500 when deleting with different channelId (not owned)", async () => {
+    const created = await createTestDescription();
+
+    const differentChannelId = "UC_DIFFERENT_USER_999";
+
+    const deleteResponse = await testApp.handle(
+      createDeleteRequest(created.id, differentChannelId),
+    );
+
+    expect(deleteResponse.status).toBe(500);
+
+    const jsonData = await deleteResponse.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(ErrorSchema)(jsonData),
+    );
+
+    expect(decoded.error).toBe("Internal Server Error");
+
+    // Verify the description still exists (not deleted)
+    const verifyResponse = await testApp.handle(
+      new Request(`${BASE_URL}/descriptions/${created.id}/content`),
+    );
+    expect(verifyResponse.status).toBe(200);
+  });
+
+  it("DELETE /descriptions/:id should return 500 for non-existent description", async () => {
+    const fakeId = "00000000-0000-0000-0000-000000000000";
+
+    const deleteResponse = await testApp.handle(
+      createDeleteRequest(fakeId, testUser.channelId),
+    );
+
+    expect(deleteResponse.status).toBe(500);
+
+    const jsonData = await deleteResponse.json();
     const decoded = await Effect.runPromise(
       Schema.decodeUnknown(ErrorSchema)(jsonData),
     );
@@ -297,11 +336,7 @@ describe("Description API - Get Content", () => {
   it("GET /descriptions/:id/content should return 404 for soft-deleted description", async () => {
     const created = await createTestDescription();
 
-    await testApp.handle(
-      new Request(`${BASE_URL}/descriptions/${created.id}`, {
-        method: "DELETE",
-      }),
-    );
+    await testApp.handle(createDeleteRequest(created.id, testUser.channelId));
 
     const response = await testApp.handle(
       new Request(`${BASE_URL}/descriptions/${created.id}/content`),

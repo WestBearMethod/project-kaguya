@@ -55,4 +55,11 @@ export const DescriptionContent = Schema.Struct({
 });
 
 export interface DescriptionContent
-  extends Schema.Schema.Type<typeof DescriptionContent> {}
+  extends Schema.Schema.Type<typeof DescriptionContent> {} // Request schema for delete operation
+
+export const DeleteDescriptionRequest = Schema.Struct({
+  channelId: Schema.String,
+});
+
+export interface DeleteDescriptionRequest
+  extends Schema.Schema.Type<typeof DeleteDescriptionRequest> {}

@@ -6,6 +6,7 @@
     "dev": "NODE_ENV=development bun run --watch src/index.ts",
     "start": "bun src/index.ts",
     "check": "bunx --bun biome check --write",
+    "check-types": "bunx --bun tsc --noEmit",
     "test": "NODE_ENV=test bun test",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",

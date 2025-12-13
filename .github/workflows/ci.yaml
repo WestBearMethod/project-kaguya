@@ -69,7 +69,7 @@ jobs:
           key: ${{ runner.os }}-tsc-${{ hashFiles('**/tsconfig.json') }}-${{ hashFiles('**/*.ts') }}
 
       - name: Type Check
-        run: bun run tsc --noEmit
+        run: bun run check-types
 
   test:
     runs-on: ubuntu-latest

@@ -1,5 +1,10 @@
 import { Schema } from "effect";
-import { DescriptionId } from "./valueObjects";
+import {
+  ChannelId,
+  DescriptionContentText,
+  DescriptionId,
+  DescriptionTitle,
+} from "./valueObjects";
 
 const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
   Schema.annotations({
@@ -15,9 +20,9 @@ const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
  */
 export const Description = Schema.Struct({
   id: DescriptionId,
-  title: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100)),
-  content: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(5000)),
-  channelId: Schema.String.pipe(Schema.length(24)),
+  title: DescriptionTitle,
+  content: DescriptionContentText,
+  channelId: ChannelId,
   createdAt: AnnotatedDateFromSelf,
   deletedAt: Schema.NullOr(AnnotatedDateFromSelf),
 });

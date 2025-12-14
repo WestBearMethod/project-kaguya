@@ -114,15 +114,79 @@ describe("Description API", () => {
     expect(response.status).toBe(200);
 
     const jsonData = await response.json();
+
+    expect(jsonData).toHaveProperty("items");
+    expect(jsonData).toHaveProperty("nextCursor");
+
     const decoded = await Effect.runPromise(
-      Schema.decodeUnknown(Schema.Array(DescriptionSummary))(jsonData),
+      Schema.decodeUnknown(
+        Schema.Struct({
+          items: Schema.Array(DescriptionSummary),
+          nextCursor: Schema.NullOr(Schema.String),
+        }),
+      )(jsonData),
     );
 
-    expect(Array.isArray(decoded)).toBe(true);
-    expect(decoded.length).toBeGreaterThan(0);
-    expect(decoded[0].title).toBe(testDescription.title);
-    expect(decoded[0].id).toBeDefined();
-    expect(decoded[0].createdAt).toBeDefined();
+    expect(Array.isArray(decoded.items)).toBe(true);
+    expect(decoded.items.length).toBeGreaterThan(0);
+    expect(decoded.items[0].title).toBe(testDescription.title);
+    expect(decoded.items[0].id).toBeDefined();
+    expect(decoded.items[0].createdAt).toBeDefined();
+  });
+
+  it("GET /descriptions should support pagination", async () => {
+    // 1. Create multiple descriptions
+    const totalCount = 5;
+    const limit = 2;
+    for (let i = 0; i < totalCount; i++) {
+      await testApp.handle(
+        new Request(`${BASE_URL}/descriptions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: `Video ${i}`,
+            content: `Content ${i}`,
+            channelId: testUser.channelId,
+          }),
+        }),
+      );
+    }
+
+    // 2. Fetch first page
+    const response1 = await testApp.handle(
+      new Request(
+        `${BASE_URL}/descriptions?channelId=${testUser.channelId}&limit=${limit}`,
+      ),
+    );
+    const page1 = (await response1.json()) as {
+      items: { id: string }[];
+      nextCursor: string;
+    };
+    expect(page1.items.length).toBe(limit);
+    expect(page1.nextCursor).not.toBeNull();
+
+    // 3. Fetch second page using cursor
+    const response2 = await testApp.handle(
+      new Request(
+        `${BASE_URL}/descriptions?channelId=${testUser.channelId}&limit=${limit}&cursor=${page1.nextCursor}`,
+      ),
+    );
+    const page2 = (await response2.json()) as {
+      items: { id: string }[];
+      nextCursor: string;
+    };
+    expect(page2.items.length).toBe(limit);
+    expect(page2.nextCursor).not.toBeNull();
+
+    // Verify ordering (descending createdAt)
+    // Since we created them sequentially, page 1 should have higher/later IDs/Time than page 2 if creation is fast enough,
+    // or we can just ensure they are different items.
+    const ids1 = page1.items.map((i) => i.id);
+    const ids2 = page2.items.map((i) => i.id);
+    // Check for no overlap
+    for (const id of ids1) {
+      expect(ids2.includes(id)).toBe(false);
+    }
   });
 });
 
@@ -240,10 +304,15 @@ describe("Description API - Soft Delete", () => {
     expect(getResponse.status).toBe(200);
     const getData = await getResponse.json();
     const descriptions = await Effect.runPromise(
-      Schema.decodeUnknown(Schema.Array(DescriptionSummary))(getData),
+      Schema.decodeUnknown(
+        Schema.Struct({
+          items: Schema.Array(DescriptionSummary),
+          nextCursor: Schema.NullOr(Schema.String),
+        }),
+      )(getData),
     );
 
-    const foundDeleted = descriptions.find((d) => d.id === created.id);
+    const foundDeleted = descriptions.items.find((d) => d.id === created.id);
     expect(foundDeleted).toBeUndefined();
   });
 

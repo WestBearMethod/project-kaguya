@@ -1,5 +1,5 @@
-import { and, desc, eq, isNull } from "drizzle-orm";
-import { Effect, Layer, Option, Schema } from "effect";
+import { and, desc, eq, isNull, lt, or } from "drizzle-orm";
+import { Chunk, Effect, Layer, Option, Schema } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
@@ -39,6 +39,29 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
   findByChannelId: (query) =>
     Effect.tryPromise({
       try: async () => {
+        const limit = query.limit ?? 20;
+
+        const [cursorTime, cursorId] = query.cursor
+          ? (() => {
+              try {
+                const decoded = Buffer.from(query.cursor, "base64").toString(
+                  "utf-8",
+                );
+                const [timeStr, idStr] = decoded.split("_");
+                if (timeStr && idStr) {
+                  return [
+                    Option.some(new Date(timeStr)),
+                    Option.some(idStr),
+                  ] as const;
+                }
+                return [Option.none(), Option.none()] as const;
+              } catch (e) {
+                console.warn("Invalid cursor format", e);
+                return [Option.none(), Option.none()] as const;
+              }
+            })()
+          : ([Option.none(), Option.none()] as const);
+
         const results = await db
           .select({
             id: descriptions.id,
@@ -50,14 +73,54 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             and(
               eq(descriptions.channelId, query.channelId),
               isNull(descriptions.deletedAt),
+              Option.isSome(cursorTime) && Option.isSome(cursorId)
+                ? or(
+                    lt(descriptions.createdAt, cursorTime.value),
+                    and(
+                      eq(descriptions.createdAt, cursorTime.value),
+                      lt(descriptions.id, cursorId.value),
+                    ),
+                  )
+                : undefined,
             ),
           )
-          .orderBy(desc(descriptions.createdAt));
-        return results;
+          .orderBy(desc(descriptions.createdAt), desc(descriptions.id))
+          .limit(limit + 1);
+
+        const [items, nextCursor] =
+          results.length > limit
+            ? (() => {
+                const items = results.slice(0, limit);
+                const lastItem = items[items.length - 1];
+                const cursorValue = `${lastItem.createdAt.toISOString()}_${lastItem.id}`;
+                return [
+                  items,
+                  Option.some(Buffer.from(cursorValue).toString("base64")),
+                ] as const;
+              })()
+            : ([results, Option.none()] as const);
+
+        return {
+          items: Chunk.fromIterable(items),
+          nextCursor: nextCursor,
+        };
       },
       catch: (error) => new Error(String(error)),
     }).pipe(
-      Effect.flatMap(Schema.decodeUnknown(Schema.Chunk(DescriptionSummary))),
+      // Validate items to ensure types are correct.
+      Effect.flatMap((result) => {
+        return Effect.gen(function* () {
+          // Decode expecting an Array, but result.items is a Chunk, so convert it first
+          const itemsArray = Chunk.toReadonlyArray(result.items);
+          const validItems = yield* Schema.decodeUnknown(
+            Schema.Chunk(DescriptionSummary),
+          )(itemsArray);
+          return {
+            items: validItems,
+            nextCursor: result.nextCursor,
+          };
+        });
+      }),
       Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
     ),
 

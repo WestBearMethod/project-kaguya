@@ -21,6 +21,14 @@ export const DescriptionSummary = Schema.Struct({
 export interface DescriptionSummary
   extends Schema.Schema.Type<typeof DescriptionSummary> {}
 
+export const PaginatedDescriptionSummary = Schema.Struct({
+  items: Schema.Chunk(DescriptionSummary),
+  nextCursor: Schema.Option(Schema.String),
+});
+
+export interface PaginatedDescriptionSummary
+  extends Schema.Schema.Type<typeof PaginatedDescriptionSummary> {}
+
 // Schema for content retrieval
 export const DescriptionContent = Schema.Struct({
   content: DescriptionContentText,

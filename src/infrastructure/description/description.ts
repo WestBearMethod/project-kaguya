@@ -80,7 +80,10 @@ export const createDescriptionController = (
           const useCase = yield* GetDescriptions;
           return yield* useCase.execute(query);
         }).pipe(
-          Effect.map(Chunk.toReadonlyArray),
+          Effect.map((summary) => ({
+            items: Chunk.toReadonlyArray(summary.items),
+            nextCursor: Option.getOrNull(summary.nextCursor),
+          })),
           Effect.provide(appLayer),
           Effect.runPromiseExit,
         );
@@ -97,7 +100,12 @@ export const createDescriptionController = (
       {
         query: Schema.standardSchemaV1(GetDescriptionsQuery),
         response: {
-          200: Schema.standardSchemaV1(Schema.Array(DescriptionSummary)),
+          200: Schema.standardSchemaV1(
+            Schema.Struct({
+              items: Schema.Array(DescriptionSummary),
+              nextCursor: Schema.NullOr(Schema.String),
+            }),
+          ),
           500: Schema.standardSchemaV1(ErrorSchema),
         },
       },

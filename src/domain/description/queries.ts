@@ -3,6 +3,8 @@ import { ChannelId, DescriptionId } from "./valueObjects";
 
 export const GetDescriptionsQuery = Schema.Struct({
   channelId: ChannelId,
+  cursor: Schema.optional(Schema.String),
+  limit: Schema.optional(Schema.NumberFromString),
 });
 
 export interface GetDescriptionsQuery

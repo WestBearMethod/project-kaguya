@@ -515,24 +515,17 @@ describe("Description API - Category", () => {
     expect(decoded.channelId).toBe(categoryUser.channelId);
   });
 
-  it("POST /descriptions should create description without category (null)", async () => {
-    // categoryプロパティなし
-    const response1 = await testApp.handle(createCategoryRequest(undefined));
-    expect(response1.status).toBe(200);
-    const json1 = await response1.json();
-    const decoded1 = await Effect.runPromise(
-      Schema.decodeUnknown(Description)(json1),
+  it.each([
+    undefined,
+    null,
+  ])("POST /descriptions should create description without category (%s)", async (category) => {
+    const response = await testApp.handle(createCategoryRequest(category));
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(Description)(json),
     );
-    expect(decoded1.category).toBeNull();
-
-    // category: null
-    const response2 = await testApp.handle(createCategoryRequest(null));
-    expect(response2.status).toBe(200);
-    const json2 = await response2.json();
-    const decoded2 = await Effect.runPromise(
-      Schema.decodeUnknown(Description)(json2),
-    );
-    expect(decoded2.category).toBeNull();
+    expect(decoded.category).toBeNull();
   });
 
   it("GET /descriptions should filter by category", async () => {

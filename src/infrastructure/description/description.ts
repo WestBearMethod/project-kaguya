@@ -19,7 +19,10 @@ import {
   DeleteDescriptionParams,
 } from "@/infrastructure/description/requests";
 import { GetDescriptionsResponse } from "@/infrastructure/description/responses";
-import { logErrorInProduction } from "@/infrastructure/logger";
+import {
+  logCauseInProduction,
+  logErrorInProduction,
+} from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
 // Compose the full application layer
@@ -51,13 +54,14 @@ export const createDescriptionController = (
       async ({ body, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* SaveDescription;
-          return yield* useCase.execute(body);
+          const description = yield* useCase.execute(body);
+          return yield* Schema.encode(Description)(description);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
           onSuccess: (value) => value,
           onFailure: (cause) => {
-            logErrorInProduction("POST /descriptions error:", cause);
+            logCauseInProduction("POST /descriptions error:", cause);
             set.status = 500;
             return { error: "Internal Server Error" };
           },
@@ -86,7 +90,7 @@ export const createDescriptionController = (
         return Exit.match(result, {
           onSuccess: (value) => value,
           onFailure: (cause) => {
-            logErrorInProduction("GET /descriptions error:", cause);
+            logCauseInProduction("GET /descriptions error:", cause);
             set.status = 500;
             return { error: "Internal Server Error" };
           },
@@ -111,14 +115,24 @@ export const createDescriptionController = (
         return Exit.match(result, {
           onSuccess: (optionContent) =>
             Option.match(optionContent, {
-              onSome: (content) => content,
+              onSome: (content) => {
+                try {
+                  return Effect.runSync(
+                    Schema.encode(DescriptionContent)(content),
+                  );
+                } catch (error) {
+                  logErrorInProduction("Encode error:", error);
+                  set.status = 500;
+                  return { error: "Internal Server Error" };
+                }
+              },
               onNone: () => {
                 set.status = 404;
                 return { error: "Not found" };
               },
             }),
           onFailure: (cause) => {
-            logErrorInProduction("GET /descriptions/:id/content error:", cause);
+            logCauseInProduction("GET /descriptions/:id/content error:", cause);
             set.status = 500;
             return { error: "Internal Server Error" };
           },
@@ -142,13 +156,14 @@ export const createDescriptionController = (
             id: params.id,
             channelId: body.channelId,
           };
-          return yield* useCase.execute(command);
+          const description = yield* useCase.execute(command);
+          return yield* Schema.encode(Description)(description);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
           onSuccess: (value) => value,
           onFailure: (cause) => {
-            logErrorInProduction("DELETE /descriptions/:id error:", cause);
+            logCauseInProduction("DELETE /descriptions/:id error:", cause);
             set.status = 500;
             return { error: "Internal Server Error" };
           },

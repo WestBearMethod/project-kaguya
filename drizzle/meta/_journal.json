@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1765388307595,
-      "tag": "0000_famous_shape",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1765458592625,
-      "tag": "0001_gray_mongoose",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1765469015138,
-      "tag": "0002_greedy_colleen_wing",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1765702795307,
-      "tag": "0003_white_starhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1765723288892,
-      "tag": "0004_fantastic_gambit",
+      "when": 1765732180617,
+      "tag": "0000_new_whistler",
       "breakpoints": true
     }
   ]

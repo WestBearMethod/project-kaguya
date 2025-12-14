@@ -1,6 +1,7 @@
 import { Schema } from "effect";
 import { AnnotatedDateFromSelf } from "@/domain/shared/primitives";
 import {
+  DescriptionCategory,
   DescriptionContentText,
   DescriptionCursor,
   DescriptionId,
@@ -16,6 +17,7 @@ import {
 export const DescriptionSummary = Schema.Struct({
   id: DescriptionId,
   title: DescriptionTitle,
+  category: Schema.NullOr(DescriptionCategory),
   createdAt: AnnotatedDateFromSelf,
 });
 

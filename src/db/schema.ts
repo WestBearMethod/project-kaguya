@@ -21,6 +21,7 @@ export const descriptions = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     title: text("title").notNull(),
     content: text("content").notNull(),
+    category: varchar("category", { length: 20 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     deletedAt: timestamp("deleted_at"),
     channelId: varchar("channel_id", { length: 24 })
@@ -31,8 +32,9 @@ export const descriptions = pgTable(
       }),
   },
   (table) => [
-    index("channel_id_created_at_idx").on(
+    index("channel_id_category_created_at_idx").on(
       table.channelId,
+      table.category,
       table.createdAt,
       table.id,
     ),

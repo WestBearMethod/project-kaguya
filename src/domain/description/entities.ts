@@ -2,6 +2,7 @@ import { Schema } from "effect";
 import { AnnotatedDateFromSelf } from "../shared/primitives";
 import {
   ChannelId,
+  DescriptionCategory,
   DescriptionContentText,
   DescriptionId,
   DescriptionTitle,
@@ -14,6 +15,7 @@ export const Description = Schema.Struct({
   id: DescriptionId,
   title: DescriptionTitle,
   content: DescriptionContentText,
+  category: Schema.NullOr(DescriptionCategory),
   channelId: ChannelId,
   createdAt: AnnotatedDateFromSelf,
   deletedAt: Schema.NullOr(AnnotatedDateFromSelf),

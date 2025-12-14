@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
@@ -466,5 +466,133 @@ describe("Description API - Get Content", () => {
     );
 
     expect(decoded.error).toBe("Not found");
+  });
+});
+
+describe("Description API - Category", () => {
+  const testApp = new Elysia().use(descriptionController);
+  const categoryUser = {
+    channelId: "UC_CATEGORY_TEST_USER_01",
+  };
+  const createCategoryRequest = (
+    category: string | null | undefined,
+    channelId = categoryUser.channelId,
+  ) =>
+    new Request(`${BASE_URL}/descriptions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: "Category Test Video",
+        content: "Testing category feature",
+        channelId,
+        category,
+      }),
+    });
+
+  // テストデータのクリーンアップ
+  const cleanup = async () => {
+    await db
+      .delete(descriptions)
+      .where(eq(descriptions.channelId, categoryUser.channelId));
+  };
+  // 各テスト前にクリーンアップ
+  beforeEach(async () => {
+    await cleanup();
+  });
+
+  it("POST /descriptions should create description with category", async () => {
+    const response = await testApp.handle(createCategoryRequest("GAMING"));
+    expect(response.status).toBe(200);
+
+    const jsonData = await response.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(Description)(jsonData),
+    );
+
+    expect(decoded.category).toBe("GAMING");
+    expect(decoded.channelId).toBe(categoryUser.channelId);
+  });
+
+  it.each([
+    undefined,
+    null,
+  ])("POST /descriptions should create description without category (%s)", async (category) => {
+    const response = await testApp.handle(createCategoryRequest(category));
+    expect(response.status).toBe(200);
+    const json = await response.json();
+    const decoded = await Effect.runPromise(
+      Schema.decodeUnknown(Description)(json),
+    );
+    expect(decoded.category).toBeNull();
+  });
+
+  it("GET /descriptions should filter by category", async () => {
+    // データ準備: GAMING x 2, MUSIC x 1, null x 1
+    await testApp.handle(createCategoryRequest("GAMING"));
+    await testApp.handle(createCategoryRequest("GAMING"));
+    await testApp.handle(createCategoryRequest("MUSIC"));
+    await testApp.handle(createCategoryRequest(null));
+
+    // GAMING でフィルタ
+    const responseGaming = await testApp.handle(
+      new Request(
+        `${BASE_URL}/descriptions?channelId=${categoryUser.channelId}&category=GAMING`,
+      ),
+    );
+    expect(responseGaming.status).toBe(200);
+    const jsonGaming = await responseGaming.json();
+    const decodedGaming = await Effect.runPromise(
+      Schema.decodeUnknown(PaginationResponse)(jsonGaming),
+    );
+    expect(decodedGaming.items.length).toBe(2);
+    expect(decodedGaming.items.every((i) => i.category === "GAMING")).toBe(
+      true,
+    );
+
+    // MUSIC でフィルタ
+    const responseMusic = await testApp.handle(
+      new Request(
+        `${BASE_URL}/descriptions?channelId=${categoryUser.channelId}&category=MUSIC`,
+      ),
+    );
+    expect(responseMusic.status).toBe(200);
+    const jsonMusic = await responseMusic.json();
+    const decodedMusic = await Effect.runPromise(
+      Schema.decodeUnknown(PaginationResponse)(jsonMusic),
+    );
+    expect(decodedMusic.items.length).toBe(1);
+    expect(decodedMusic.items[0].category).toBe("MUSIC");
+
+    // フィルタなし（全件）
+    const responseAll = await testApp.handle(
+      new Request(
+        `${BASE_URL}/descriptions?channelId=${categoryUser.channelId}`,
+      ),
+    );
+    expect(responseAll.status).toBe(200);
+    const jsonAll = await responseAll.json();
+    const decodedAll = await Effect.runPromise(
+      Schema.decodeUnknown(PaginationResponse)(jsonAll),
+    );
+    expect(decodedAll.items.length).toBe(4);
+
+    // 未分類（null）でフィルタ
+    // クエリパラメータ ?category=null (文字列) は Schema.transform により null に変換される。
+
+    const responseNull = await testApp.handle(
+      new Request(
+        `${BASE_URL}/descriptions?channelId=${categoryUser.channelId}&category=null`,
+      ),
+    );
+    expect(responseNull.status).toBe(200);
+
+    const jsonNull = await responseNull.json();
+    const decodedNull = await Effect.runPromise(
+      Schema.decodeUnknown(PaginationResponse)(jsonNull),
+    );
+    expect(decodedNull.items.length).toBe(1);
+    expect(decodedNull.items[0].category).toBeNull();
   });
 });

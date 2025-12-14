@@ -24,4 +24,17 @@ export const DescriptionCursor = Schema.String.pipe(
   Schema.pattern(Base64Regex, { message: () => "Invalid base64 cursor" }),
 );
 
+export const DescriptionCategory = Schema.Literal(
+  "GENERAL",
+  "GAMING",
+  "CHAT",
+  "MUSIC",
+  "EVENT",
+  "COLLAB",
+);
+
+export type DescriptionCategory = Schema.Schema.Type<
+  typeof DescriptionCategory
+>;
+
 export const PAGINATION_LIMIT = 50;

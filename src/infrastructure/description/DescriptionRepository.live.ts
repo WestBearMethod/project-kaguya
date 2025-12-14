@@ -49,13 +49,18 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
                   "utf-8",
                 );
                 const [timeStr, idStr] = decoded.split("_");
-                if (timeStr && idStr) {
-                  return [
-                    Option.some(new Date(timeStr)),
-                    Option.some(idStr),
-                  ] as const;
+
+                if (!timeStr || !idStr) {
+                  return [Option.none(), Option.none()] as const;
                 }
-                return [Option.none(), Option.none()] as const;
+
+                const date = new Date(timeStr);
+                if (Number.isNaN(date.getTime())) {
+                  console.warn(`Invalid date format in cursor: ${timeStr}`);
+                  return [Option.none(), Option.none()] as const;
+                }
+
+                return [Option.some(date), Option.some(idStr)] as const;
               } catch (e) {
                 console.warn("Invalid cursor format", e);
                 return [Option.none(), Option.none()] as const;

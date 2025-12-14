@@ -24,7 +24,7 @@ export interface DescriptionSummary
 
 export const PaginatedDescriptionSummary = Schema.Struct({
   items: Schema.Chunk(DescriptionSummary),
-  nextCursor: Schema.Option(DescriptionCursor),
+  nextCursor: Schema.NullOr(DescriptionCursor),
 });
 
 export interface PaginatedDescriptionSummary

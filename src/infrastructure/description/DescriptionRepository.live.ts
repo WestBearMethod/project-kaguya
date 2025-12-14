@@ -1,11 +1,11 @@
 import { and, desc, eq, isNull, lt, or } from "drizzle-orm";
-import { Chunk, Effect, Layer, Option, Schema } from "effect";
+import { Effect, Layer, Option, Schema } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import {
   DescriptionContent,
-  DescriptionSummary,
+  PaginatedDescriptionSummary,
 } from "@/domain/description/dtos";
 import { Description } from "@/domain/description/entities";
 import { PAGINATION_LIMIT } from "@/domain/description/valueObjects";
@@ -99,29 +99,18 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
                   Option.some(Buffer.from(cursorValue).toString("base64")),
                 ] as const;
               })()
-            : ([results, Option.none()] as const);
+            : ([results, Option.none<string>()] as const);
 
         return {
-          items: Chunk.fromIterable(items),
-          nextCursor: nextCursor,
+          items,
+          nextCursor: Option.getOrNull(nextCursor),
         };
       },
       catch: (error) => new Error(String(error)),
     }).pipe(
-      // Validate items to ensure types are correct.
-      Effect.flatMap((result) => {
-        return Effect.gen(function* () {
-          // Decode expecting an Array, but result.items is a Chunk, so convert it first
-          const itemsArray = Chunk.toReadonlyArray(result.items);
-          const validItems = yield* Schema.decodeUnknown(
-            Schema.Chunk(DescriptionSummary),
-          )(itemsArray);
-          return {
-            items: validItems,
-            nextCursor: result.nextCursor,
-          };
-        });
-      }),
+      Effect.flatMap((result) =>
+        Schema.decodeUnknown(PaginatedDescriptionSummary)(result),
+      ),
       Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
     ),
 

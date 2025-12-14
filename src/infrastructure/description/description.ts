@@ -76,15 +76,12 @@ export const createDescriptionController = (
       async ({ query, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* GetDescriptions;
-          return yield* useCase.execute(query);
-        }).pipe(
-          Effect.map((summary) => ({
+          const summary = yield* useCase.execute(query);
+          return yield* Schema.encode(GetDescriptionsResponse)({
             items: Chunk.toReadonlyArray(summary.items),
-            nextCursor: Option.getOrNull(summary.nextCursor),
-          })),
-          Effect.provide(appLayer),
-          Effect.runPromiseExit,
-        );
+            nextCursor: summary.nextCursor,
+          });
+        }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
           onSuccess: (value) => value,

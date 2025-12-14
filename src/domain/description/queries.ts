@@ -1,9 +1,9 @@
 import { Schema } from "effect";
-import { ChannelId, DescriptionId } from "./valueObjects";
+import { ChannelId, DescriptionCursor, DescriptionId } from "./valueObjects";
 
 export const GetDescriptionsQuery = Schema.Struct({
   channelId: ChannelId,
-  cursor: Schema.optional(Schema.String),
+  cursor: Schema.optional(DescriptionCursor),
   limit: Schema.optional(Schema.NumberFromString),
 });
 

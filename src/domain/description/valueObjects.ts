@@ -18,3 +18,8 @@ export const DescriptionContentText = Schema.String.pipe(
   Schema.minLength(1),
   Schema.maxLength(5000),
 );
+
+const Base64Regex = /^[a-zA-Z0-9+/]*={0,2}$/;
+export const DescriptionCursor = Schema.String.pipe(
+  Schema.pattern(Base64Regex, { message: () => "Invalid base64 cursor" }),
+);

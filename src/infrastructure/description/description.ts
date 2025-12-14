@@ -17,6 +17,7 @@ import {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
 } from "@/domain/description/queries";
+import { DescriptionCursor } from "@/domain/description/valueObjects";
 import {
   DeleteDescriptionBody,
   DeleteDescriptionParams,
@@ -103,7 +104,7 @@ export const createDescriptionController = (
           200: Schema.standardSchemaV1(
             Schema.Struct({
               items: Schema.Array(DescriptionSummary),
-              nextCursor: Schema.NullOr(Schema.String),
+              nextCursor: Schema.NullOr(DescriptionCursor),
             }),
           ),
           500: Schema.standardSchemaV1(ErrorSchema),

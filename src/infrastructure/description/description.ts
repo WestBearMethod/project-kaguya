@@ -8,20 +8,17 @@ import {
   CreateDescriptionCommand,
   type DeleteDescriptionCommand,
 } from "@/domain/description/commands";
-import {
-  DescriptionContent,
-  DescriptionSummary,
-} from "@/domain/description/dtos";
+import { DescriptionContent } from "@/domain/description/dtos";
 import { Description } from "@/domain/description/entities";
 import {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
 } from "@/domain/description/queries";
-import { DescriptionCursor } from "@/domain/description/valueObjects";
 import {
   DeleteDescriptionBody,
   DeleteDescriptionParams,
 } from "@/infrastructure/description/requests";
+import { GetDescriptionsResponse } from "@/infrastructure/description/responses";
 import { logErrorInProduction } from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
@@ -101,12 +98,7 @@ export const createDescriptionController = (
       {
         query: Schema.standardSchemaV1(GetDescriptionsQuery),
         response: {
-          200: Schema.standardSchemaV1(
-            Schema.Struct({
-              items: Schema.Array(DescriptionSummary),
-              nextCursor: Schema.NullOr(DescriptionCursor),
-            }),
-          ),
+          200: Schema.standardSchemaV1(GetDescriptionsResponse),
           500: Schema.standardSchemaV1(ErrorSchema),
         },
       },

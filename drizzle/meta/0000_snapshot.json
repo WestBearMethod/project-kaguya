@@ -1,5 +1,5 @@
 {
-  "id": "5a8c24aa-8e70-4ebe-9a87-62bba4d9376a",
+  "id": "75083ef1-c3d3-4090-bfb5-c4e5dd314a88",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -27,12 +27,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "category": {
+          "name": "category",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         },
         "channel_id": {
           "name": "channel_id",
@@ -42,11 +54,29 @@
         }
       },
       "indexes": {
-        "channel_id_idx": {
-          "name": "channel_id_idx",
+        "channel_id_category_created_at_idx": {
+          "name": "channel_id_category_created_at_idx",
           "columns": [
             {
               "expression": "channel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "category",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -65,8 +95,8 @@
           "tableTo": "users",
           "columnsFrom": ["channel_id"],
           "columnsTo": ["channel_id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {},

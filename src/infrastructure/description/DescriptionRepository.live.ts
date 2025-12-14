@@ -39,7 +39,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
   findByChannelId: (query) =>
     Effect.tryPromise({
       try: async () => {
-        const limit = query.limit ?? 20;
+        const limit = query.limit;
 
         const [cursorTime, cursorId] = query.cursor
           ? (() => {

@@ -2,6 +2,7 @@ import { Schema } from "effect";
 import { AnnotatedDateFromSelf } from "@/domain/shared/primitives";
 import {
   DescriptionContentText,
+  DescriptionCursor,
   DescriptionId,
   DescriptionTitle,
 } from "./valueObjects";
@@ -20,6 +21,14 @@ export const DescriptionSummary = Schema.Struct({
 
 export interface DescriptionSummary
   extends Schema.Schema.Type<typeof DescriptionSummary> {}
+
+export const PaginatedDescriptionSummary = Schema.Struct({
+  items: Schema.Chunk(DescriptionSummary),
+  nextCursor: Schema.NullOr(DescriptionCursor),
+});
+
+export interface PaginatedDescriptionSummary
+  extends Schema.Schema.Type<typeof PaginatedDescriptionSummary> {}
 
 // Schema for content retrieval
 export const DescriptionContent = Schema.Struct({

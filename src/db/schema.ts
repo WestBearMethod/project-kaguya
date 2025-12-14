@@ -30,7 +30,13 @@ export const descriptions = pgTable(
         onUpdate: "cascade",
       }),
   },
-  (table) => [index("channel_id_idx").on(table.channelId)],
+  (table) => [
+    index("channel_id_created_at_idx").on(
+      table.channelId,
+      table.createdAt,
+      table.id,
+    ),
+  ],
 );
 
 // Relations definition

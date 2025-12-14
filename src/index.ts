@@ -6,7 +6,9 @@ import { healthController } from "./infrastructure/health/health";
 
 const app = new Elysia();
 
-if (process.env.NODE_ENV === "development") {
+const isDevelopment = process.env.NODE_ENV === "development";
+
+if (isDevelopment) {
   app.use(
     openapi({
       mapJsonSchema: {
@@ -23,5 +25,5 @@ app
   .listen(3000);
 
 console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
+  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}${isDevelopment ? "/openapi" : ""}`,
 );

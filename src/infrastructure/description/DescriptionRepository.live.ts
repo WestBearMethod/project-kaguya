@@ -1,13 +1,14 @@
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, lt, or } from "drizzle-orm";
 import { Effect, Layer, Option, Schema } from "effect";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import {
   DescriptionContent,
-  DescriptionSummary,
+  PaginatedDescriptionSummary,
 } from "@/domain/description/dtos";
 import { Description } from "@/domain/description/entities";
+import { PAGINATION_LIMIT } from "@/domain/description/valueObjects";
 
 export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
   save: (command) =>
@@ -39,6 +40,34 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
   findByChannelId: (query) =>
     Effect.tryPromise({
       try: async () => {
+        const limit = PAGINATION_LIMIT;
+
+        const [cursorTime, cursorId] = query.cursor
+          ? (() => {
+              try {
+                const decoded = Buffer.from(query.cursor, "base64").toString(
+                  "utf-8",
+                );
+                const [timeStr, idStr] = decoded.split("_");
+
+                if (!timeStr || !idStr) {
+                  return [Option.none(), Option.none()] as const;
+                }
+
+                const date = new Date(timeStr);
+                if (Number.isNaN(date.getTime())) {
+                  console.warn(`Invalid date format in cursor: ${timeStr}`);
+                  return [Option.none(), Option.none()] as const;
+                }
+
+                return [Option.some(date), Option.some(idStr)] as const;
+              } catch (e) {
+                console.warn("Invalid cursor format", e);
+                return [Option.none(), Option.none()] as const;
+              }
+            })()
+          : ([Option.none(), Option.none()] as const);
+
         const results = await db
           .select({
             id: descriptions.id,
@@ -50,14 +79,43 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             and(
               eq(descriptions.channelId, query.channelId),
               isNull(descriptions.deletedAt),
+              Option.isSome(cursorTime) && Option.isSome(cursorId)
+                ? or(
+                    lt(descriptions.createdAt, cursorTime.value),
+                    and(
+                      eq(descriptions.createdAt, cursorTime.value),
+                      lt(descriptions.id, cursorId.value),
+                    ),
+                  )
+                : undefined,
             ),
           )
-          .orderBy(desc(descriptions.createdAt));
-        return results;
+          .orderBy(desc(descriptions.createdAt), desc(descriptions.id))
+          .limit(limit + 1);
+
+        const [items, nextCursor] =
+          results.length > limit
+            ? (() => {
+                const items = results.slice(0, limit);
+                const lastItem = items[items.length - 1];
+                const cursorValue = `${lastItem.createdAt.toISOString()}_${lastItem.id}`;
+                return [
+                  items,
+                  Option.some(Buffer.from(cursorValue).toString("base64")),
+                ] as const;
+              })()
+            : ([results, Option.none<string>()] as const);
+
+        return {
+          items,
+          nextCursor: Option.getOrNull(nextCursor),
+        };
       },
       catch: (error) => new Error(String(error)),
     }).pipe(
-      Effect.flatMap(Schema.decodeUnknown(Schema.Chunk(DescriptionSummary))),
+      Effect.flatMap((result) =>
+        Schema.decodeUnknown(PaginatedDescriptionSummary)(result),
+      ),
       Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
     ),
 

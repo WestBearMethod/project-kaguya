@@ -1,9 +1,9 @@
-import { type Chunk, Context, type Effect, type Option } from "effect";
+import { Context, type Effect, type Option } from "effect";
 import type {
   CreateDescriptionCommand,
   DeleteDescriptionCommand,
 } from "./commands";
-import type { DescriptionContent, DescriptionSummary } from "./dtos";
+import type { DescriptionContent, PaginatedDescriptionSummary } from "./dtos";
 import type { Description } from "./entities";
 import type {
   GetDescriptionContentQuery,
@@ -17,7 +17,7 @@ export interface IDescriptionRepository {
 
   readonly findByChannelId: (
     query: GetDescriptionsQuery,
-  ) => Effect.Effect<Chunk.Chunk<DescriptionSummary>, Error>;
+  ) => Effect.Effect<PaginatedDescriptionSummary, Error>;
 
   readonly findById: (
     query: GetDescriptionContentQuery,

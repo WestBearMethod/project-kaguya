@@ -584,5 +584,22 @@ describe("Description API - Category", () => {
       Schema.decodeUnknown(PaginationResponse)(jsonAll),
     );
     expect(decodedAll.items.length).toBe(4);
+
+    // 未分類（null）でフィルタ
+    // クエリパラメータ ?category=null (文字列) は Schema.transform により null に変換される。
+
+    const responseNull = await testApp.handle(
+      new Request(
+        `${BASE_URL}/descriptions?channelId=${categoryUser.channelId}&category=null`,
+      ),
+    );
+    expect(responseNull.status).toBe(200);
+
+    const jsonNull = await responseNull.json();
+    const decodedNull = await Effect.runPromise(
+      Schema.decodeUnknown(PaginationResponse)(jsonNull),
+    );
+    expect(decodedNull.items.length).toBe(1);
+    expect(decodedNull.items[0].category).toBeNull();
   });
 });

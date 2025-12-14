@@ -81,9 +81,11 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             and(
               eq(descriptions.channelId, query.channelId),
               isNull(descriptions.deletedAt),
-              query.category
-                ? eq(descriptions.category, query.category)
-                : undefined,
+              query.category === null
+                ? isNull(descriptions.category)
+                : query.category
+                  ? eq(descriptions.category, query.category)
+                  : undefined,
               Option.isSome(cursorTime) && Option.isSome(cursorId)
                 ? or(
                     lt(descriptions.createdAt, cursorTime.value),

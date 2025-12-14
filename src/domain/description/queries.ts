@@ -9,7 +9,19 @@ import {
 export const GetDescriptionsQuery = Schema.Struct({
   channelId: ChannelId,
   cursor: Schema.optional(DescriptionCursor),
-  category: Schema.optional(DescriptionCategory),
+  category: Schema.optional(
+    Schema.transform(
+      Schema.Union(
+        Schema.NullOr(DescriptionCategory),
+        Schema.Literal("null", ""),
+      ),
+      Schema.NullOr(DescriptionCategory),
+      {
+        decode: (input) => (input === "null" || input === "" ? null : input),
+        encode: (input) => input,
+      },
+    ),
+  ),
 });
 
 export interface GetDescriptionsQuery

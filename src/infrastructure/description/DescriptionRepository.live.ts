@@ -25,6 +25,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
           .values({
             title: command.title,
             content: command.content,
+            category: command.category,
             channelId: command.channelId,
           })
           .returning();
@@ -72,6 +73,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
           .select({
             id: descriptions.id,
             title: descriptions.title,
+            category: descriptions.category,
             createdAt: descriptions.createdAt,
           })
           .from(descriptions)
@@ -79,6 +81,9 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
             and(
               eq(descriptions.channelId, query.channelId),
               isNull(descriptions.deletedAt),
+              query.category
+                ? eq(descriptions.category, query.category)
+                : undefined,
               Option.isSome(cursorTime) && Option.isSome(cursorId)
                 ? or(
                     lt(descriptions.createdAt, cursorTime.value),

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { descriptions, users } from "@/db/schema";
@@ -6,6 +6,19 @@ import { descriptions, users } from "@/db/schema";
 describe("Foreign Key Constraints - CASCADE", () => {
   const testChannelId = "UC_CASCADE_TEST_001";
   const updatedChannelId = "UC_CASCADE_TEST_002";
+
+  const cleanup = async () => {
+    await db.delete(users).where(eq(users.channelId, testChannelId));
+    await db.delete(users).where(eq(users.channelId, updatedChannelId));
+  };
+
+  beforeEach(async () => {
+    await cleanup();
+  });
+
+  afterEach(async () => {
+    await cleanup();
+  });
 
   it("should CASCADE DELETE descriptions when user is deleted", async () => {
     await db.insert(users).values({ channelId: testChannelId });
@@ -54,7 +67,5 @@ describe("Foreign Key Constraints - CASCADE", () => {
       .where(eq(descriptions.id, createdDesc.id));
 
     expect(updatedDesc.channelId).toBe(updatedChannelId);
-
-    await db.delete(users).where(eq(users.channelId, updatedChannelId));
   });
 });

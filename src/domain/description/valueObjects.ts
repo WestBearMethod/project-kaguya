@@ -24,8 +24,4 @@ export const DescriptionCursor = Schema.String.pipe(
   Schema.pattern(Base64Regex, { message: () => "Invalid base64 cursor" }),
 );
 
-export const DEFAULT_PAGINATION_LIMIT = 50;
-export const PaginationLimit = Schema.Number.pipe(
-  Schema.int(),
-  Schema.between(1, 100),
-);
+export const PAGINATION_LIMIT = 50;

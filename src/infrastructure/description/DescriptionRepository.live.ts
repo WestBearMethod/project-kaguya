@@ -8,6 +8,7 @@ import {
   DescriptionSummary,
 } from "@/domain/description/dtos";
 import { Description } from "@/domain/description/entities";
+import { PAGINATION_LIMIT } from "@/domain/description/valueObjects";
 
 export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
   save: (command) =>
@@ -39,7 +40,7 @@ export const DescriptionRepositoryLive = Layer.succeed(DescriptionRepository, {
   findByChannelId: (query) =>
     Effect.tryPromise({
       try: async () => {
-        const limit = query.limit;
+        const limit = PAGINATION_LIMIT;
 
         const [cursorTime, cursorId] = query.cursor
           ? (() => {

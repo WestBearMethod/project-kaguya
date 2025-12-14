@@ -29,6 +29,13 @@
       "when": 1765702795307,
       "tag": "0003_white_starhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1765723288892,
+      "tag": "0004_fantastic_gambit",
+      "breakpoints": true
     }
   ]
 }

@@ -31,7 +31,11 @@ export const descriptions = pgTable(
       }),
   },
   (table) => [
-    index("channel_id_created_at_idx").on(table.channelId, table.createdAt),
+    index("channel_id_created_at_idx").on(
+      table.channelId,
+      table.createdAt,
+      table.id,
+    ),
   ],
 );
 

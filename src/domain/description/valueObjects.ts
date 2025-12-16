@@ -30,6 +30,7 @@ export const DescriptionContentText = Schema.String.pipe(
 const Base64Regex = /^[a-zA-Z0-9+/]*={0,2}$/;
 export const DescriptionCursor = Schema.String.pipe(
   Schema.pattern(Base64Regex, { message: () => "Invalid base64 cursor" }),
+  Schema.maxLength(128),
 );
 
 export const DescriptionCategory = Schema.Literal(

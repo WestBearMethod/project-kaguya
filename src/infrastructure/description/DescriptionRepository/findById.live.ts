@@ -6,30 +6,30 @@ import type { IDescriptionRepository } from "@/domain/description/DescriptionRep
 import { DescriptionContent } from "@/domain/description/dtos";
 
 export const findById: IDescriptionRepository["findById"] = (query) =>
-  Effect.tryPromise({
-    try: async () => {
-      const [result] = await db
-        .select({
-          content: descriptions.content,
-        })
-        .from(descriptions)
-        .where(
-          and(eq(descriptions.id, query.id), isNull(descriptions.deletedAt)),
-        )
-        .limit(1);
-      return Option.fromNullable(result);
-    },
-    catch: (error) => new Error(String(error)),
-  }).pipe(
-    Effect.flatMap((option) =>
-      Option.match(option, {
-        onNone: () => Effect.succeed(Option.none()),
-        onSome: (content) =>
-          Effect.map(
-            Schema.decodeUnknown(DescriptionContent)(content),
-            Option.some,
-          ),
-      }),
-    ),
-    Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
-  );
+  Effect.gen(function* () {
+    const maybeResult = yield* Effect.tryPromise({
+      try: async () => {
+        const [result] = await db
+          .select({
+            content: descriptions.content,
+          })
+          .from(descriptions)
+          .where(
+            and(eq(descriptions.id, query.id), isNull(descriptions.deletedAt)),
+          )
+          .limit(1);
+        return Option.fromNullable(result);
+      },
+      catch: (error) => new Error(String(error)),
+    });
+
+    if (Option.isNone(maybeResult)) {
+      return Option.none();
+    }
+
+    const content = yield* Schema.decodeUnknown(DescriptionContent)(
+      maybeResult.value,
+    ).pipe(Effect.catchAll((error) => Effect.fail(new Error(String(error)))));
+
+    return Option.some(content);
+  });

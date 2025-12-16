@@ -5,6 +5,7 @@ import { descriptions } from "@/db/schema";
 import type { IDescriptionRepository } from "@/domain/description/DescriptionRepository";
 import { PaginatedDescriptionSummary } from "@/domain/description/dtos";
 import { PAGINATION_LIMIT } from "@/domain/description/valueObjects";
+import { decodeCursor, encodeCursor } from "../utils";
 
 export const findByChannelId: IDescriptionRepository["findByChannelId"] = (
   query,
@@ -13,31 +14,7 @@ export const findByChannelId: IDescriptionRepository["findByChannelId"] = (
     try: async () => {
       const limit = PAGINATION_LIMIT;
 
-      const [cursorTime, cursorId] = query.cursor
-        ? (() => {
-            try {
-              const decoded = Buffer.from(query.cursor, "base64").toString(
-                "utf-8",
-              );
-              const [timeStr, idStr] = decoded.split("_");
-
-              if (!timeStr || !idStr) {
-                return [Option.none(), Option.none()] as const;
-              }
-
-              const date = new Date(timeStr);
-              if (Number.isNaN(date.getTime())) {
-                console.warn(`Invalid date format in cursor: ${timeStr}`);
-                return [Option.none(), Option.none()] as const;
-              }
-
-              return [Option.some(date), Option.some(idStr)] as const;
-            } catch (e) {
-              console.warn("Invalid cursor format", e);
-              return [Option.none(), Option.none()] as const;
-            }
-          })()
-        : ([Option.none(), Option.none()] as const);
+      const [cursorTime, cursorId] = decodeCursor(query.cursor);
 
       const results = await db
         .select({
@@ -75,11 +52,7 @@ export const findByChannelId: IDescriptionRepository["findByChannelId"] = (
           ? (() => {
               const items = results.slice(0, limit);
               const lastItem = items[items.length - 1];
-              const cursorValue = `${lastItem.createdAt.toISOString()}_${lastItem.id}`;
-              return [
-                items,
-                Option.some(Buffer.from(cursorValue).toString("base64")),
-              ] as const;
+              return [items, Option.some(encodeCursor(lastItem))] as const;
             })()
           : ([results, Option.none<string>()] as const);
 

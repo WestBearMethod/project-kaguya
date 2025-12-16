@@ -4,8 +4,16 @@ import { Schema } from "effect";
  * Value Objects: Domain concepts with business rules
  * These represent the fundamental building blocks of the Description domain.
  */
-
-export const DescriptionId = Schema.UUID;
+export const DescriptionId = Schema.UUID.pipe(
+  Schema.annotations({
+    jsonSchema: {
+      format: "uuid",
+      description: "Unique Identifier (UUID)",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+    },
+  }),
+);
 
 export const ChannelId = Schema.String.pipe(Schema.length(24));
 

@@ -19,10 +19,7 @@ import {
   DeleteDescriptionParams,
 } from "@/infrastructure/description/requests";
 import { GetDescriptionsResponse } from "@/infrastructure/description/responses";
-import {
-  logCauseInProduction,
-  logErrorInProduction,
-} from "@/infrastructure/logger";
+import { logCauseInProduction } from "@/infrastructure/logger";
 import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
 // Compose the full application layer
@@ -109,23 +106,21 @@ export const createDescriptionController = (
       async ({ params, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* GetDescriptionContent;
-          return yield* useCase.execute(params);
+          const optionContent = yield* useCase.execute(params);
+
+          return yield* Option.match(optionContent, {
+            onNone: () => Effect.succeed(Option.none()),
+            onSome: (content) =>
+              Schema.encode(DescriptionContent)(content).pipe(
+                Effect.map(Option.some),
+              ),
+          });
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
           onSuccess: (optionContent) =>
             Option.match(optionContent, {
-              onSome: (content) => {
-                try {
-                  return Effect.runSync(
-                    Schema.encode(DescriptionContent)(content),
-                  );
-                } catch (error) {
-                  logErrorInProduction("Encode error:", error);
-                  set.status = 500;
-                  return { error: "Internal Server Error" };
-                }
-              },
+              onSome: (content) => content,
               onNone: () => {
                 set.status = 404;
                 return { error: "Not found" };

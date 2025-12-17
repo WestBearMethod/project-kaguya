@@ -14,13 +14,14 @@ import {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
 } from "@/domain/description/queries";
+import { DatabaseServiceLive } from "@/infrastructure/db/service";
+import { DescriptionRepositoryLive } from "@/infrastructure/description/DescriptionRepository.live";
 import {
   DeleteDescriptionBody,
   DeleteDescriptionParams,
 } from "@/infrastructure/description/requests";
 import { GetDescriptionsResponse } from "@/infrastructure/description/responses";
 import { logCauseInProduction } from "@/infrastructure/logger";
-import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
 // Compose the full application layer
 // UseCases depend on Repository.
@@ -29,7 +30,10 @@ export const AppLayer = Layer.mergeAll(
   GetDescriptions.Live,
   GetDescriptionContent.Live,
   DeleteDescription.Live,
-).pipe(Layer.provide(DescriptionRepositoryLive));
+).pipe(
+  Layer.provide(DescriptionRepositoryLive),
+  Layer.provide(DatabaseServiceLive),
+);
 
 export const ErrorSchema = Schema.Struct({
   error: Schema.String,

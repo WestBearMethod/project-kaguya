@@ -67,5 +67,5 @@ export const findByChannelId: IDescriptionRepository["findByChannelId"] = (
 
     return yield* Schema.decodeUnknown(PaginatedDescriptionSummary)(
       result,
-    ).pipe(Effect.catchAll((error) => Effect.fail(new Error(String(error)))));
+    ).pipe(Effect.mapError((error) => new Error(String(error))));
   });

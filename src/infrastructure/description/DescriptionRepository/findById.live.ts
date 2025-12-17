@@ -29,7 +29,7 @@ export const findById: IDescriptionRepository["findById"] = (query) =>
 
     const content = yield* Schema.decodeUnknown(DescriptionContent)(
       maybeResult.value,
-    ).pipe(Effect.catchAll((error) => Effect.fail(new Error(String(error)))));
+    ).pipe(Effect.mapError((error) => new Error(String(error))));
 
     return Option.some(content);
   });

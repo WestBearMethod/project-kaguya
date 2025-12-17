@@ -31,6 +31,6 @@ export const softDelete: IDescriptionRepository["softDelete"] = (command) =>
     });
 
     return yield* Schema.decodeUnknown(Description)(result).pipe(
-      Effect.catchAll((error) => Effect.fail(new Error(String(error)))),
+      Effect.mapError((error) => new Error(String(error))),
     );
   });

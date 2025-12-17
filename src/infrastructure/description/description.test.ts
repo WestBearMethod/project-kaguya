@@ -15,12 +15,20 @@ import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
+import type {
+  CreateDescriptionCommand,
+  DeleteDescriptionCommand,
+} from "@/domain/description/commands";
 import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
 import {
   DescriptionContent,
   DescriptionSummary as DescriptionSummaryActual,
 } from "@/domain/description/dtos";
 import { Description as DescriptionActual } from "@/domain/description/entities";
+import type {
+  GetDescriptionContentQuery,
+  GetDescriptionsQuery,
+} from "@/domain/description/queries";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { setupTestDb } from "@/infrastructure/db/test";
 import {
@@ -330,11 +338,13 @@ describe("Description API Integration Tests", () => {
 
   describe("Description API - Error Handling", () => {
     const FailingRepositoryLive = Layer.succeed(DescriptionRepository, {
-      save: () => Effect.fail(new Error("Database connection failed")),
-      findByChannelId: () =>
+      save: (_command: CreateDescriptionCommand) =>
         Effect.fail(new Error("Database connection failed")),
-      findById: () => Effect.fail(new Error("Database connection failed")),
-      softDelete: (_command: unknown) =>
+      findByChannelId: (_query: GetDescriptionsQuery) =>
+        Effect.fail(new Error("Database connection failed")),
+      findById: (_query: GetDescriptionContentQuery) =>
+        Effect.fail(new Error("Database connection failed")),
+      softDelete: (_command: DeleteDescriptionCommand) =>
         Effect.fail(new Error("Database connection failed")),
     });
 

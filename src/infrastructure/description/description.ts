@@ -108,14 +108,13 @@ export const createDescriptionController = (
           const useCase = yield* GetDescriptionContent;
           const optionContent = yield* useCase.execute(params);
 
-          if (Option.isNone(optionContent)) {
-            return Option.none();
-          }
-
-          const encoded = yield* Schema.encode(DescriptionContent)(
-            optionContent.value,
-          );
-          return Option.some(encoded);
+          return yield* Option.match(optionContent, {
+            onNone: () => Effect.succeed(Option.none()),
+            onSome: (content) =>
+              Schema.encode(DescriptionContent)(content).pipe(
+                Effect.map(Option.some),
+              ),
+          });
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {

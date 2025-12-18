@@ -106,7 +106,7 @@ describe("User API Integration Tests", () => {
       }
     });
 
-    it("DELETE /users/:channelId should return 500 for non-existent user", async () => {
+    it("DELETE /users/:channelId should return 404 for non-existent user", async () => {
       const testApp = createTestApp();
       const fakeChannelId = "UC_FAKE_USER_99999999999";
 
@@ -116,16 +116,16 @@ describe("User API Integration Tests", () => {
         }),
       );
 
-      expect(deleteResponse.status).toBe(500);
+      expect(deleteResponse.status).toBe(404);
       const jsonData = await deleteResponse.json();
       const decoded = await Effect.runPromise(
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe("User Not Found");
     });
 
-    it("DELETE /users/:channelId should return 500 when trying to delete an already deleted user", async () => {
+    it("DELETE /users/:channelId should return 409 when trying to delete an already deleted user", async () => {
       const testApp = createTestApp();
       const deletedUser = {
         channelId: "UC_ALREADY_DELETED_USER0",
@@ -148,13 +148,13 @@ describe("User API Integration Tests", () => {
         }),
       );
 
-      expect(deleteResponse.status).toBe(500);
+      expect(deleteResponse.status).toBe(409);
       const jsonData = await deleteResponse.json();
       const decoded = await Effect.runPromise(
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe("User Already Deleted");
     });
   });
 

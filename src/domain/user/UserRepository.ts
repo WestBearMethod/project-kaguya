@@ -1,6 +1,7 @@
 import { Context, type Effect, type Option } from "effect";
 import type { DeleteUserCommand } from "@/domain/user/commands";
 import type { DeletedUser, UserFound } from "./dtos";
+import type { UserDomainError } from "./errors";
 import type { GetUserByChannelIdQuery } from "./queries";
 
 export interface IUserRepository {
@@ -10,7 +11,7 @@ export interface IUserRepository {
 
   readonly softDeleteWithDescriptions: (
     command: DeleteUserCommand,
-  ) => Effect.Effect<DeletedUser, Error>;
+  ) => Effect.Effect<DeletedUser, UserDomainError | Error>;
 }
 
 export class UserRepository extends Context.Tag("UserRepository")<

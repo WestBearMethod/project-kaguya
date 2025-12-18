@@ -37,3 +37,5 @@ next-env.d.ts
 
 # OpenAPI generated types
 *.d.ts
+
+.agent

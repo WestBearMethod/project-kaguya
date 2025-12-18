@@ -9,10 +9,7 @@ import {
 import { eq } from "drizzle-orm";
 import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
-import { DeleteDescription } from "@/application/description/deleteDescription";
-import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
-import { GetDescriptions } from "@/application/description/getDescriptions";
-import { SaveDescription } from "@/application/description/saveDescription";
+import { AppLayerContext, UseCasesLive } from "@/application/layer";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import type {
@@ -31,11 +28,8 @@ import type {
 } from "@/domain/description/queries";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { setupTestDb } from "@/infrastructure/db/test";
-import {
-  AppLayerContext,
-  createDescriptionController,
-  ErrorSchema,
-} from "@/infrastructure/description/description";
+import { createDescriptionController } from "@/presentation/description/description";
+import { ErrorSchema } from "@/presentation/description/schemas";
 import {
   replaceDateForTest,
   replaceNullableDateForTest,
@@ -348,12 +342,9 @@ describe("Description API Integration Tests", () => {
         Effect.fail(new Error("Database connection failed")),
     });
 
-    const FailingAppLayer = Layer.mergeAll(
-      SaveDescription.Live,
-      GetDescriptions.Live,
-      GetDescriptionContent.Live,
-      DeleteDescription.Live,
-    ).pipe(Layer.provide(FailingRepositoryLive));
+    const FailingAppLayer = UseCasesLive.pipe(
+      Layer.provide(FailingRepositoryLive),
+    );
 
     const failingController = createDescriptionController(FailingAppLayer);
     const testApp = new Elysia().use(failingController);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { Effect, Schema } from "effect";
 import { Elysia } from "elysia";
-import { healthController } from "./health";
+import { healthController } from "@/presentation/health/health";
 
 const BASE_URL = "http://localhost";
 

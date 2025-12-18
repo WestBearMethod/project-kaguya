@@ -2,6 +2,7 @@ import { Effect, Exit, type Layer, Schema } from "effect";
 import { Elysia } from "elysia";
 import { AppLayer } from "@/application/layer";
 import { DeleteUser } from "@/application/user/deleteUser";
+import { DeleteUserCommand } from "@/domain/user/commands";
 import { logCauseInProduction } from "@/infrastructure/logger";
 import { DeleteUserParams } from "@/presentation/user/requests";
 import { DeleteUserResponse } from "@/presentation/user/responses";
@@ -14,7 +15,7 @@ export const createUserController = (
     "/:channelId",
     async ({ params, set }) => {
       const result = await Effect.gen(function* () {
-        const command = yield* Schema.decodeUnknown(DeleteUserParams)(params);
+        const command = yield* Schema.decodeUnknown(DeleteUserCommand)(params);
         const useCase = yield* DeleteUser;
         const deleted = yield* useCase.execute(command);
         return yield* Schema.encode(DeleteUserResponse)(deleted);

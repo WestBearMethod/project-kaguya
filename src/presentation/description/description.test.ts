@@ -13,6 +13,7 @@ import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
+import { AppLayerContext } from "@/application/layer";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import type {
@@ -31,11 +32,8 @@ import type {
 } from "@/domain/description/queries";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { setupTestDb } from "@/infrastructure/db/test";
-import {
-  AppLayerContext,
-  createDescriptionController,
-  ErrorSchema,
-} from "@/infrastructure/description/description";
+import { createDescriptionController } from "@/presentation/description/description";
+import { ErrorSchema } from "@/presentation/description/schemas";
 import {
   replaceDateForTest,
   replaceNullableDateForTest,

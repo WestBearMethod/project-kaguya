@@ -1,9 +1,10 @@
-import { Chunk, Effect, Exit, Layer, Option, Schema } from "effect";
+import { Chunk, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import { DeleteDescription } from "@/application/description/deleteDescription";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
 import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
+import { AppLayer } from "@/application/layer";
 import {
   CreateDescriptionCommand,
   type DeleteDescriptionCommand,
@@ -14,34 +15,13 @@ import {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
 } from "@/domain/description/queries";
-import { DatabaseServiceLive } from "@/infrastructure/db/service";
-import { DescriptionRepositoryLive } from "@/infrastructure/description/DescriptionRepository.live";
+import { logCauseInProduction } from "@/infrastructure/logger";
 import {
   DeleteDescriptionBody,
   DeleteDescriptionParams,
-} from "@/infrastructure/description/requests";
-import { GetDescriptionsResponse } from "@/infrastructure/description/responses";
-import { logCauseInProduction } from "@/infrastructure/logger";
-
-// Compose the full application layer
-// UseCases depend on Repository.
-// Repositories depend on DatabaseService.
-// This layer requires DatabaseService to be provided.
-export const AppLayerContext = Layer.mergeAll(
-  SaveDescription.Live,
-  GetDescriptions.Live,
-  GetDescriptionContent.Live,
-  DeleteDescription.Live,
-).pipe(Layer.provide(DescriptionRepositoryLive));
-
-// The Live layer with real database
-export const AppLayer = AppLayerContext.pipe(
-  Layer.provide(DatabaseServiceLive),
-);
-
-export const ErrorSchema = Schema.Struct({
-  error: Schema.String,
-});
+} from "@/presentation/description/requests";
+import { GetDescriptionsResponse } from "@/presentation/description/responses";
+import { ErrorSchema } from "@/presentation/description/schemas";
 
 export const createDescriptionController = (
   appLayer: Layer.Layer<

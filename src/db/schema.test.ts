@@ -1,9 +1,31 @@
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from "bun:test";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
+import { setupTestDb } from "@/infrastructure/db/test";
 
 describe("Foreign Key Constraints - CASCADE", () => {
+  let db: DrizzleDb;
+  let teardownDb: () => Promise<void>;
+
+  beforeAll(async () => {
+    const setup = await setupTestDb();
+    db = setup.db;
+    teardownDb = setup.teardown;
+  });
+
+  afterAll(async () => {
+    if (teardownDb) await teardownDb();
+  });
+
   const testChannelId = "UC_CASCADE_TEST_001";
   const updatedChannelId = "UC_CASCADE_TEST_002";
 

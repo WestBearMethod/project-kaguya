@@ -14,22 +14,30 @@ import {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
 } from "@/domain/description/queries";
+import { DatabaseServiceLive } from "@/infrastructure/db/service";
+import { DescriptionRepositoryLive } from "@/infrastructure/description/DescriptionRepository.live";
 import {
   DeleteDescriptionBody,
   DeleteDescriptionParams,
 } from "@/infrastructure/description/requests";
 import { GetDescriptionsResponse } from "@/infrastructure/description/responses";
 import { logCauseInProduction } from "@/infrastructure/logger";
-import { DescriptionRepositoryLive } from "./DescriptionRepository.live";
 
 // Compose the full application layer
 // UseCases depend on Repository.
-export const AppLayer = Layer.mergeAll(
+// Repositories depend on DatabaseService.
+// This layer requires DatabaseService to be provided.
+export const AppLayerContext = Layer.mergeAll(
   SaveDescription.Live,
   GetDescriptions.Live,
   GetDescriptionContent.Live,
   DeleteDescription.Live,
 ).pipe(Layer.provide(DescriptionRepositoryLive));
+
+// The Live layer with real database
+export const AppLayer = AppLayerContext.pipe(
+  Layer.provide(DatabaseServiceLive),
+);
 
 export const ErrorSchema = Schema.Struct({
   error: Schema.String,

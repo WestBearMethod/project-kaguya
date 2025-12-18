@@ -6,3 +6,5 @@ const connectionString = `postgres://${process.env.DB_USER}:${process.env.DB_PAS
 
 const client = postgres(connectionString);
 export const db = drizzle(client, { schema });
+
+export type DrizzleDb = typeof db;

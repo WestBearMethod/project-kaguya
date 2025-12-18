@@ -1,16 +1,17 @@
 import { and, eq, isNull } from "drizzle-orm";
-import { Effect, Option } from "effect";
+import { Effect, Option, Schema } from "effect";
 import type { DrizzleDb } from "@/db";
 import { users } from "@/db/schema";
+import { UserFound } from "@/domain/user/dtos";
 import type { IUserRepository } from "@/domain/user/UserRepository";
 
 export const makeFindByChannelId =
   (db: DrizzleDb): IUserRepository["findByChannelId"] =>
   (query) =>
     Effect.gen(function* () {
-      const result = yield* Effect.tryPromise({
+      const user = yield* Effect.tryPromise({
         try: async () => {
-          const [user] = await db
+          const [result] = await db
             .select({ id: users.id, channelId: users.channelId })
             .from(users)
             .where(
@@ -21,10 +22,14 @@ export const makeFindByChannelId =
             )
             .limit(1);
 
-          return user;
+          return result;
         },
         catch: (error) => new Error(String(error)),
       });
 
-      return result ? Option.some(result) : Option.none();
+      if (!user) {
+        return Option.none();
+      }
+
+      return Option.some(yield* Schema.decodeUnknown(UserFound)(user));
     });

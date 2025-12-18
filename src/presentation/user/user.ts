@@ -14,8 +14,9 @@ export const createUserController = (
     "/:channelId",
     async ({ params, set }) => {
       const result = await Effect.gen(function* () {
+        const command = yield* Schema.decodeUnknown(DeleteUserParams)(params);
         const useCase = yield* DeleteUser;
-        const deleted = yield* useCase.execute(params);
+        const deleted = yield* useCase.execute(command);
         return yield* Schema.encode(DeleteUserResponse)(deleted);
       }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 

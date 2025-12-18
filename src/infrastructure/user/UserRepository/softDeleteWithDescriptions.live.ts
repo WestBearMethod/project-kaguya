@@ -1,20 +1,21 @@
 import { and, eq, isNull } from "drizzle-orm";
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
+import { DeletedUser } from "@/domain/user/dtos";
 import type { IUserRepository } from "@/domain/user/UserRepository";
 
 export const makeSoftDeleteWithDescriptions =
   (db: DrizzleDb): IUserRepository["softDeleteWithDescriptions"] =>
   (command) =>
     Effect.gen(function* () {
-      const result = yield* Effect.tryPromise({
+      const deletedUser = yield* Effect.tryPromise({
         try: async () => {
           return await db.transaction(async (tx) => {
             const now = new Date();
 
             // 1. ユーザーを論理削除
-            const [deletedUser] = await tx
+            const [result] = await tx
               .update(users)
               .set({ deletedAt: now })
               .where(
@@ -28,7 +29,7 @@ export const makeSoftDeleteWithDescriptions =
                 deletedAt: users.deletedAt,
               });
 
-            if (!deletedUser) {
+            if (!result) {
               throw new Error("User not found or already deleted");
             }
 
@@ -43,20 +44,11 @@ export const makeSoftDeleteWithDescriptions =
                 ),
               );
 
-            return deletedUser;
+            return result;
           });
         },
         catch: (error) => new Error(String(error)),
       });
 
-      if (!result.deletedAt) {
-        return yield* Effect.fail(
-          new Error("Failed to delete user: deletedAt is null"),
-        );
-      }
-
-      return {
-        channelId: result.channelId,
-        deletedAt: result.deletedAt,
-      };
+      return yield* Schema.decodeUnknown(DeletedUser)(deletedUser);
     });

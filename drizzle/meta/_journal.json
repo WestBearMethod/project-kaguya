@@ -8,6 +8,13 @@
       "when": 1765732180617,
       "tag": "0000_new_whistler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766040805721,
+      "tag": "0001_cool_phantom_reporter",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
 import type { DrizzleDb } from "@/db";
 import { users } from "@/db/schema";
@@ -12,14 +12,13 @@ export const makeFindByChannelId =
       const user = yield* Effect.tryPromise({
         try: async () => {
           const [result] = await db
-            .select({ id: users.id, channelId: users.channelId })
+            .select({
+              id: users.id,
+              channelId: users.channelId,
+              deletedAt: users.deletedAt,
+            })
             .from(users)
-            .where(
-              and(
-                eq(users.channelId, query.channelId),
-                isNull(users.deletedAt),
-              ),
-            )
+            .where(eq(users.channelId, query.channelId))
             .limit(1);
 
           return result;

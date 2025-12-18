@@ -5,6 +5,7 @@ import { ChannelId, UserId } from "@/domain/shared/valueObjects";
 export const UserFound = Schema.Struct({
   id: UserId,
   channelId: ChannelId,
+  deletedAt: Schema.NullOr(AnnotatedDateFromSelf),
 });
 
 export type UserFound = Schema.Schema.Type<typeof UserFound>;

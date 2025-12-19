@@ -3,10 +3,6 @@ import { Effect, Schema } from "effect";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DeletedUser } from "@/domain/user/dtos";
-import {
-  UserAlreadyDeletedError,
-  UserNotFoundError,
-} from "@/domain/user/errors";
 import type { IUserRepository } from "@/domain/user/UserRepository";
 
 export const makeSoftDeleteWithDescriptions =

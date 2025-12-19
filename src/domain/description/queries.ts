@@ -1,6 +1,6 @@
 import { Schema } from "effect";
+import { ChannelId } from "../shared/valueObjects";
 import {
-  ChannelId,
   DescriptionCategory,
   DescriptionCursor,
   DescriptionId,

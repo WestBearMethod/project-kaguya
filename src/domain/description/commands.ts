@@ -1,6 +1,7 @@
 import { Schema } from "effect";
+import { ChannelId } from "@/domain/shared/valueObjects";
 import { Description } from "./entities";
-import { ChannelId, DescriptionCategory, DescriptionId } from "./valueObjects";
+import { DescriptionCategory, DescriptionId } from "./valueObjects";
 
 export const CreateDescriptionCommand = Description.pipe(
   Schema.omit("id", "createdAt", "deletedAt", "category"),

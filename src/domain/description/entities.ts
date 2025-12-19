@@ -1,7 +1,7 @@
 import { Schema } from "effect";
 import { AnnotatedDateFromSelf } from "../shared/primitives";
+import { ChannelId } from "../shared/valueObjects";
 import {
-  ChannelId,
   DescriptionCategory,
   DescriptionContentText,
   DescriptionId,

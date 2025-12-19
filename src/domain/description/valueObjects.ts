@@ -15,8 +15,6 @@ export const DescriptionId = Schema.UUID.pipe(
   }),
 );
 
-export const ChannelId = Schema.String.pipe(Schema.length(24));
-
 export const DescriptionTitle = Schema.String.pipe(
   Schema.minLength(1),
   Schema.maxLength(100),

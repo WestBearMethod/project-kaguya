@@ -7,7 +7,7 @@ import { descriptions, users } from "@/db/schema";
 import { AppLayerContext } from "@/shared/application/layer";
 import { DatabaseService } from "@/shared/infrastructure/db";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
-import { replaceDateForTest } from "@/test-utils/schema";
+import { replaceDateForTest } from "@/shared/test-utils/schema";
 import { DeleteUser } from "@/user/application/deleteUser";
 import type { GetUserByChannelIdQuery } from "@/user/application/queries";
 import { UserReader, UserWriter } from "@/user/application/UserRepository";

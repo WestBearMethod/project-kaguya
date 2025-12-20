@@ -40,7 +40,7 @@ import { setupTestDb } from "@/shared/infrastructure/db.test";
 import {
   replaceDateForTest,
   replaceNullableDateForTest,
-} from "@/test-utils/schema";
+} from "@/shared/test-utils/schema";
 
 const BASE_URL = "http://localhost";
 

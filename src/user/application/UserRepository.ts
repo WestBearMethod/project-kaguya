@@ -1,8 +1,9 @@
 import { Context, type Effect, type Option } from "effect";
+import type { ChannelId } from "@/domain/shared/valueObjects";
+import type { DeletedUser, UserFound } from "@/user/application/dtos";
+import type { GetUserByChannelIdQuery } from "@/user/application/queries";
+import type { User } from "@/user/domain/entities";
 import type { UserDomainError } from "@/user/domain/errors";
-import type { DeleteUserCommand } from "./commands";
-import type { DeletedUser, UserFound } from "./dtos";
-import type { GetUserByChannelIdQuery } from "./queries";
 
 /**
  * UserReader (リードモデル)
@@ -22,8 +23,18 @@ export class UserReader extends Context.Tag("UserReader")<
  * UserWriter (ライトモデル)
  */
 export interface IUserWriter {
-  readonly softDeleteWithDescriptions: (
-    command: DeleteUserCommand,
+  /**
+   * 更新・削除操作のために Entity を取得する
+   */
+  readonly findEntityByChannelId: (
+    channelId: typeof ChannelId.Type,
+  ) => Effect.Effect<Option.Option<User>, Error>;
+
+  /**
+   * 論理削除
+   */
+  readonly softDelete: (
+    user: User,
   ) => Effect.Effect<DeletedUser, UserDomainError | Error>;
 }
 

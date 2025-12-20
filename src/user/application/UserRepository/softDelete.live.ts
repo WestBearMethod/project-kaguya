@@ -4,30 +4,22 @@ import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DeletedUser } from "@/user/application/dtos";
 import type { IUserWriter } from "@/user/application/UserRepository";
+import type { User } from "@/user/domain/entities";
 
-export const makeSoftDeleteWithDescriptions =
-  (db: DrizzleDb): IUserWriter["softDeleteWithDescriptions"] =>
-  (command) =>
+export const makeSoftDelete =
+  (db: DrizzleDb): IUserWriter["softDelete"] =>
+  (user: User) =>
     Effect.gen(function* () {
+      const deletedAt = user.deletedAt ?? new Date();
+
       const deletedUser = yield* Effect.tryPromise({
         try: async () => {
           return await db.transaction(async (tx) => {
-            const now = new Date();
-
-            // 1. ユーザーを論理削除
             const [result] = await tx
               .update(users)
-              .set({ deletedAt: now })
-              .where(
-                and(
-                  eq(users.channelId, command.channelId),
-                  isNull(users.deletedAt),
-                ),
-              )
-              .returning({
-                channelId: users.channelId,
-                deletedAt: users.deletedAt,
-              });
+              .set({ deletedAt })
+              .where(and(eq(users.id, user.id), isNull(users.deletedAt)))
+              .returning();
 
             if (!result) {
               throw new Error(
@@ -35,13 +27,12 @@ export const makeSoftDeleteWithDescriptions =
               );
             }
 
-            // 2. ユーザーの全ての description を論理削除
             await tx
               .update(descriptions)
-              .set({ deletedAt: now })
+              .set({ deletedAt })
               .where(
                 and(
-                  eq(descriptions.channelId, command.channelId),
+                  eq(descriptions.channelId, user.channelId),
                   isNull(descriptions.deletedAt),
                 ),
               );
@@ -49,9 +40,7 @@ export const makeSoftDeleteWithDescriptions =
             return result;
           });
         },
-        catch: (error) => {
-          return new Error(String(error));
-        },
+        catch: (error) => new Error(String(error)),
       });
 
       return yield* Schema.decodeUnknown(DeletedUser)(deletedUser);

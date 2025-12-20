@@ -8,10 +8,10 @@ import { descriptions, users } from "@/db/schema";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { setupTestDb } from "@/infrastructure/db/test";
 import { replaceDateForTest } from "@/test-utils/schema";
-import type { DeleteUserCommand } from "@/user/application/commands";
 import { DeleteUser } from "@/user/application/deleteUser";
 import type { GetUserByChannelIdQuery } from "@/user/application/queries";
 import { UserReader, UserWriter } from "@/user/application/UserRepository";
+import type { User } from "@/user/domain/entities";
 import { createUserController } from "@/user/presentation/controller";
 import { DeleteUserResponse as DeleteUserResponseActual } from "@/user/presentation/responses";
 import { ErrorSchema } from "@/user/presentation/schemas";
@@ -165,7 +165,9 @@ describe("User API Integration Tests", () => {
     });
 
     const FailingWriterLive = Layer.succeed(UserWriter, {
-      softDeleteWithDescriptions: (_command: DeleteUserCommand) =>
+      findEntityByChannelId: (_channelId: string) =>
+        Effect.fail(new Error("Database connection failed")),
+      softDelete: (_user: User) =>
         Effect.fail(new Error("Database connection failed")),
     });
 

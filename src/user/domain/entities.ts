@@ -1,4 +1,4 @@
-import { Schema } from "effect";
+import { type Effect, type ParseResult, Schema } from "effect";
 import { AnnotatedDateFromSelf } from "@/domain/shared/primitives";
 import { ChannelId, UserId } from "@/domain/shared/valueObjects";
 
@@ -18,3 +18,14 @@ export interface User extends Schema.Schema.Type<typeof User> {}
  * Domain Logic: Check if the user is already deleted
  */
 export const isUserDeleted = (user: User): boolean => user.deletedAt !== null;
+
+/**
+ * Domain Logic: Perform soft delete on a user entity
+ */
+export const softDeleteUser = (
+  user: User,
+): Effect.Effect<User, ParseResult.ParseError> =>
+  Schema.decode(User)({
+    ...user,
+    deletedAt: new Date(),
+  });

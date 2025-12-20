@@ -1,9 +1,8 @@
-import { Context, Effect, Layer, Option, Schema } from "effect";
+import { Context, Effect, Layer, Option } from "effect";
 import type { DeleteUserCommand } from "@/user/application/commands";
 import type { DeletedUser } from "@/user/application/dtos";
-import { GetUserByChannelIdQuery } from "@/user/application/queries";
-import { UserReader, UserWriter } from "@/user/application/UserRepository";
-import { isUserDeleted } from "@/user/domain/entities";
+import { UserWriter } from "@/user/application/UserRepository";
+import { isUserDeleted, softDeleteUser } from "@/user/domain/entities";
 import {
   UserAlreadyDeletedError,
   type UserDomainError,
@@ -21,31 +20,33 @@ export class DeleteUser extends Context.Tag("DeleteUser")<
   static readonly Live = Layer.effect(
     DeleteUser,
     Effect.gen(function* () {
-      const reader = yield* UserReader;
       const writer = yield* UserWriter;
       return {
         execute: (command: DeleteUserCommand) =>
           Effect.gen(function* () {
-            const query = yield* Schema.decodeUnknown(GetUserByChannelIdQuery)(
-              command,
+            const userOption = yield* writer.findEntityByChannelId(
+              command.channelId,
             );
-            const userOption = yield* reader.findByChannelId(query);
 
             const user = yield* Option.match(userOption, {
               onNone: () =>
                 Effect.fail(
-                  new UserNotFoundError({ channelId: query.channelId }),
+                  new UserNotFoundError({ channelId: command.channelId }),
                 ),
               onSome: (user) => Effect.succeed(user),
             });
 
             if (isUserDeleted(user)) {
               return yield* Effect.fail(
-                new UserAlreadyDeletedError({ channelId: query.channelId }),
+                new UserAlreadyDeletedError({ channelId: command.channelId }),
               );
             }
 
-            return yield* writer.softDeleteWithDescriptions(command);
+            const updatedUser = yield* softDeleteUser(user).pipe(
+              Effect.mapError((error) => new Error(String(error))),
+            );
+
+            return yield* writer.softDelete(updatedUser);
           }),
       };
     }),

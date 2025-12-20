@@ -5,8 +5,14 @@ import { GetDescriptions } from "@/application/description/getDescriptions";
 import { SaveDescription } from "@/application/description/saveDescription";
 import { DeleteUser } from "@/application/user/deleteUser";
 import { DatabaseServiceLive } from "@/infrastructure/db/service";
-import { DescriptionRepositoryLive } from "@/infrastructure/description/DescriptionRepository.live";
-import { UserRepositoryLive } from "@/infrastructure/user/UserRepository/UserRepository.live";
+import {
+  DescriptionReaderLive,
+  DescriptionWriterLive,
+} from "@/infrastructure/description/DescriptionRepository.live";
+import {
+  UserReaderLive,
+  UserWriterLive,
+} from "@/infrastructure/user/UserRepository/UserRepository.live";
 
 export const UseCasesLive = Layer.mergeAll(
   SaveDescription.Live,
@@ -17,7 +23,14 @@ export const UseCasesLive = Layer.mergeAll(
 );
 
 export const AppLayerContext = UseCasesLive.pipe(
-  Layer.provide(Layer.mergeAll(DescriptionRepositoryLive, UserRepositoryLive)),
+  Layer.provide(
+    Layer.mergeAll(
+      DescriptionReaderLive,
+      DescriptionWriterLive,
+      UserReaderLive,
+      UserWriterLive,
+    ),
+  ),
 );
 
 export const AppLayer = AppLayerContext.pipe(

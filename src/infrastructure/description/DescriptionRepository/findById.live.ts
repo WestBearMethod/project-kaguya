@@ -1,12 +1,12 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
-import type { IDescriptionRepository } from "@/application/description/DescriptionRepository";
+import type { IDescriptionReader } from "@/application/description/DescriptionRepository";
 import { DescriptionContent } from "@/application/description/dtos";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
 
 export const makeFindById =
-  (db: DrizzleDb): IDescriptionRepository["findById"] =>
+  (db: DrizzleDb): IDescriptionReader["findById"] =>
   (query) =>
     Effect.gen(function* () {
       const maybeResult = yield* Effect.tryPromise({

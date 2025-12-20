@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull, lt, or } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
-import type { IDescriptionRepository } from "@/application/description/DescriptionRepository";
+import type { IDescriptionReader } from "@/application/description/DescriptionRepository";
 import { PaginatedDescriptionSummary } from "@/application/description/dtos";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
@@ -8,7 +8,7 @@ import { PAGINATION_LIMIT } from "@/domain/description/valueObjects";
 import { decodeCursor, encodeCursor } from "@/infrastructure/description/utils";
 
 export const makeFindByChannelId =
-  (db: DrizzleDb): IDescriptionRepository["findByChannelId"] =>
+  (db: DrizzleDb): IDescriptionReader["findByChannelId"] =>
   (query) =>
     Effect.gen(function* () {
       const [cursorTime, cursorId] = yield* decodeCursor(query.cursor);

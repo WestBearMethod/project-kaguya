@@ -13,7 +13,11 @@ import type {
   CreateDescriptionCommand,
   DeleteDescriptionCommand,
 } from "@/application/description/commands";
-import { DescriptionRepository } from "@/application/description/DescriptionRepository";
+import {
+  DescriptionReader,
+  DescriptionWriter,
+} from "@/application/description/DescriptionRepository";
+
 import { DeleteDescription } from "@/application/description/deleteDescription";
 import {
   DescriptionContent,
@@ -335,12 +339,15 @@ describe("Description API Integration Tests", () => {
   });
 
   describe("Description API - Error Handling", () => {
-    const FailingRepositoryLive = Layer.succeed(DescriptionRepository, {
-      save: (_command: CreateDescriptionCommand) =>
-        Effect.fail(new Error("Database connection failed")),
+    const FailingReaderLive = Layer.succeed(DescriptionReader, {
       findByChannelId: (_query: GetDescriptionsQuery) =>
         Effect.fail(new Error("Database connection failed")),
       findById: (_query: GetDescriptionContentQuery) =>
+        Effect.fail(new Error("Database connection failed")),
+    });
+
+    const FailingWriterLive = Layer.succeed(DescriptionWriter, {
+      save: (_command: CreateDescriptionCommand) =>
         Effect.fail(new Error("Database connection failed")),
       softDelete: (_command: DeleteDescriptionCommand) =>
         Effect.fail(new Error("Database connection failed")),
@@ -351,7 +358,7 @@ describe("Description API Integration Tests", () => {
       GetDescriptions.Live,
       GetDescriptionContent.Live,
       DeleteDescription.Live,
-    ).pipe(Layer.provide(FailingRepositoryLive));
+    ).pipe(Layer.provide(Layer.mergeAll(FailingReaderLive, FailingWriterLive)));
 
     const failingController = createDescriptionController(FailingAppLayer);
     const testApp = new Elysia().use(failingController);

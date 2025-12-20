@@ -6,7 +6,7 @@ import { AppLayerContext } from "@/application/layer";
 import type { DeleteUserCommand } from "@/application/user/commands";
 import { DeleteUser } from "@/application/user/deleteUser";
 import type { GetUserByChannelIdQuery } from "@/application/user/queries";
-import { UserRepository } from "@/application/user/UserRepository";
+import { UserReader, UserWriter } from "@/application/user/UserRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DatabaseService } from "@/infrastructure/db/service";
@@ -159,15 +159,18 @@ describe("User API Integration Tests", () => {
   });
 
   describe("User Soft Delete - Error Handling", () => {
-    const FailingRepositoryLive = Layer.succeed(UserRepository, {
+    const FailingReaderLive = Layer.succeed(UserReader, {
       findByChannelId: (_query: GetUserByChannelIdQuery) =>
         Effect.fail(new Error("Database connection failed")),
+    });
+
+    const FailingWriterLive = Layer.succeed(UserWriter, {
       softDeleteWithDescriptions: (_command: DeleteUserCommand) =>
         Effect.fail(new Error("Database connection failed")),
     });
 
     const FailingAppLayer = DeleteUser.Live.pipe(
-      Layer.provide(FailingRepositoryLive),
+      Layer.provide(Layer.mergeAll(FailingReaderLive, FailingWriterLive)),
     );
 
     const failingController = createUserController(FailingAppLayer);

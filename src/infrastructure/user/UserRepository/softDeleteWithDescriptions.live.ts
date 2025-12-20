@@ -1,12 +1,12 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { Effect, Schema } from "effect";
 import { DeletedUser } from "@/application/user/dtos";
-import type { IUserRepository } from "@/application/user/UserRepository";
+import type { IUserWriter } from "@/application/user/UserRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 
 export const makeSoftDeleteWithDescriptions =
-  (db: DrizzleDb): IUserRepository["softDeleteWithDescriptions"] =>
+  (db: DrizzleDb): IUserWriter["softDeleteWithDescriptions"] =>
   (command) =>
     Effect.gen(function* () {
       const deletedUser = yield* Effect.tryPromise({

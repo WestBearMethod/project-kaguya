@@ -4,17 +4,30 @@ import type { DeleteUserCommand } from "./commands";
 import type { DeletedUser, UserFound } from "./dtos";
 import type { GetUserByChannelIdQuery } from "./queries";
 
-export interface IUserRepository {
+/**
+ * UserReader (リードモデル)
+ */
+export interface IUserReader {
   readonly findByChannelId: (
     query: GetUserByChannelIdQuery,
   ) => Effect.Effect<Option.Option<UserFound>, Error>;
+}
 
+export class UserReader extends Context.Tag("UserReader")<
+  UserReader,
+  IUserReader
+>() {}
+
+/**
+ * UserWriter (ライトモデル)
+ */
+export interface IUserWriter {
   readonly softDeleteWithDescriptions: (
     command: DeleteUserCommand,
   ) => Effect.Effect<DeletedUser, UserDomainError | Error>;
 }
 
-export class UserRepository extends Context.Tag("UserRepository")<
-  UserRepository,
-  IUserRepository
+export class UserWriter extends Context.Tag("UserWriter")<
+  UserWriter,
+  IUserWriter
 >() {}

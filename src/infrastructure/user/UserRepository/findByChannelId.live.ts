@@ -1,12 +1,12 @@
 import { eq } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
 import { UserFound } from "@/application/user/dtos";
-import type { IUserRepository } from "@/application/user/UserRepository";
+import type { IUserReader } from "@/application/user/UserRepository";
 import type { DrizzleDb } from "@/db";
 import { users } from "@/db/schema";
 
 export const makeFindByChannelId =
-  (db: DrizzleDb): IUserRepository["findByChannelId"] =>
+  (db: DrizzleDb): IUserReader["findByChannelId"] =>
   (query) =>
     Effect.gen(function* () {
       const user = yield* Effect.tryPromise({

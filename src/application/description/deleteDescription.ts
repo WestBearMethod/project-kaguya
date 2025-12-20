@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import type { DeleteDescriptionCommand } from "@/application/description/commands";
-import { DescriptionRepository } from "@/application/description/DescriptionRepository";
+import { DescriptionWriter } from "@/application/description/DescriptionRepository";
 import type { Description } from "@/domain/description/entities";
 
 export class DeleteDescription extends Context.Tag("DeleteDescription")<
@@ -14,7 +14,7 @@ export class DeleteDescription extends Context.Tag("DeleteDescription")<
   static readonly Live = Layer.effect(
     DeleteDescription,
     Effect.gen(function* () {
-      const repository = yield* DescriptionRepository;
+      const repository = yield* DescriptionWriter;
       return {
         execute: (command: DeleteDescriptionCommand) =>
           repository.softDelete(command),

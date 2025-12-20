@@ -1,12 +1,12 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { Effect, Schema } from "effect";
-import type { IDescriptionRepository } from "@/application/description/DescriptionRepository";
+import type { IDescriptionWriter } from "@/application/description/DescriptionRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
 import { Description } from "@/domain/description/entities";
 
 export const makeSoftDelete =
-  (db: DrizzleDb): IDescriptionRepository["softDelete"] =>
+  (db: DrizzleDb): IDescriptionWriter["softDelete"] =>
   (command) =>
     Effect.gen(function* () {
       const result = yield* Effect.tryPromise({

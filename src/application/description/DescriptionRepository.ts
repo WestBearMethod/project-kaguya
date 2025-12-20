@@ -13,7 +13,11 @@ import type {
 } from "@/application/description/queries";
 import type { Description } from "@/domain/description/entities";
 
-export interface IDescriptionRepository {
+/**
+ * DescriptionReader (リードモデル)
+ * 参照系の責務を担う
+ */
+export interface IDescriptionReader {
   readonly findByChannelId: (
     query: GetDescriptionsQuery,
   ) => Effect.Effect<PaginatedDescriptionSummary, Error>;
@@ -21,7 +25,18 @@ export interface IDescriptionRepository {
   readonly findById: (
     query: GetDescriptionContentQuery,
   ) => Effect.Effect<Option.Option<DescriptionContent>, Error>;
+}
 
+export class DescriptionReader extends Context.Tag("DescriptionReader")<
+  DescriptionReader,
+  IDescriptionReader
+>() {}
+
+/**
+ * DescriptionWriter (ライトモデル)
+ * 更新系の責務を担う
+ */
+export interface IDescriptionWriter {
   readonly save: (
     command: CreateDescriptionCommand,
   ) => Effect.Effect<Description, Error>;
@@ -31,7 +46,7 @@ export interface IDescriptionRepository {
   ) => Effect.Effect<Description, Error>;
 }
 
-export class DescriptionRepository extends Context.Tag("DescriptionRepository")<
-  DescriptionRepository,
-  IDescriptionRepository
+export class DescriptionWriter extends Context.Tag("DescriptionWriter")<
+  DescriptionWriter,
+  IDescriptionWriter
 >() {}

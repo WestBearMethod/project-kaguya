@@ -2,7 +2,7 @@ import { openapi } from "@elysiajs/openapi";
 import { JSONSchema } from "effect";
 import { Elysia } from "elysia";
 import { descriptionController } from "@/description/presentation/controller";
-import { healthController } from "@/presentation/health/health";
+import { healthController } from "@/health/controller";
 import { userController } from "@/user/presentation/controller";
 
 const app = new Elysia();

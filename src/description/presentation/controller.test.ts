@@ -36,6 +36,7 @@ import { createDescriptionController } from "@/description/presentation/controll
 import { ErrorSchema } from "@/description/presentation/schemas";
 import { AppLayerContext } from "@/shared/application/layer";
 import { DatabaseService } from "@/shared/infrastructure/db";
+import { DrizzleServiceLive } from "@/shared/infrastructure/db/DrizzleService.live";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
 import {
   replaceDateForTest,
@@ -85,7 +86,10 @@ describe("Description API Integration Tests", () => {
   });
 
   const createTestApp = () => {
-    const appLayer = AppLayerContext.pipe(Layer.provide(TestLayer));
+    const appLayer = AppLayerContext.pipe(
+      Layer.provide(DrizzleServiceLive),
+      Layer.provide(TestLayer),
+    );
     const controller = createDescriptionController(appLayer);
     return new Elysia().use(controller);
   };

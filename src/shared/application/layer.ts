@@ -8,6 +8,7 @@ import { GetDescriptionContent } from "@/description/application/getDescriptionC
 import { GetDescriptions } from "@/description/application/getDescriptions";
 import { SaveDescription } from "@/description/application/saveDescription";
 import { DatabaseServiceLive } from "@/shared/infrastructure/db";
+import { DrizzleServiceLive } from "@/shared/infrastructure/db/DrizzleService.live";
 import { DeleteUser } from "@/user/application/deleteUser";
 import {
   UserReaderLive,
@@ -34,5 +35,6 @@ export const AppLayerContext = UseCasesLive.pipe(
 );
 
 export const AppLayer = AppLayerContext.pipe(
+  Layer.provide(DrizzleServiceLive),
   Layer.provide(DatabaseServiceLive),
 );

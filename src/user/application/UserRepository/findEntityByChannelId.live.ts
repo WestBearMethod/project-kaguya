@@ -1,25 +1,22 @@
 import { eq } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
-import type { DrizzleDb } from "@/db";
 import { users } from "@/db/schema";
 import type { ChannelId } from "@/shared/domain/valueObjects";
+import type { IDrizzleService } from "@/shared/infrastructure/db/DrizzleService";
 import type { IUserWriter } from "@/user/application/UserRepository";
 import { User } from "@/user/domain/entities";
 
 export const makeFindEntityByChannelId =
-  (db: DrizzleDb): IUserWriter["findEntityByChannelId"] =>
+  (service: IDrizzleService): IUserWriter["findEntityByChannelId"] =>
   (channelId: typeof ChannelId.Type) =>
     Effect.gen(function* () {
-      const maybeResult = yield* Effect.tryPromise({
-        try: async () => {
-          const [result] = await db
-            .select()
-            .from(users)
-            .where(eq(users.channelId, channelId))
-            .limit(1);
-          return Option.fromNullable(result);
-        },
-        catch: (error) => new Error(String(error)),
+      const maybeResult = yield* service.run(async (db) => {
+        const [result] = await db
+          .select()
+          .from(users)
+          .where(eq(users.channelId, channelId))
+          .limit(1);
+        return Option.fromNullable(result);
       });
 
       if (Option.isNone(maybeResult)) {

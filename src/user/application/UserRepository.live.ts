@@ -1,5 +1,5 @@
 import { Effect, Layer } from "effect";
-import { DatabaseService } from "@/shared/infrastructure/db";
+import { DrizzleService } from "@/shared/infrastructure/db/DrizzleService";
 import { UserReader, UserWriter } from "@/user/application/UserRepository";
 import { makeFindByChannelId } from "@/user/application/UserRepository/findByChannelId.live";
 import { makeFindEntityByChannelId } from "@/user/application/UserRepository/findEntityByChannelId.live";
@@ -8,9 +8,9 @@ import { makeSoftDelete } from "@/user/application/UserRepository/softDelete.liv
 export const UserReaderLive = Layer.effect(
   UserReader,
   Effect.gen(function* () {
-    const db = yield* DatabaseService;
+    const service = yield* DrizzleService;
     return {
-      findByChannelId: makeFindByChannelId(db),
+      findByChannelId: makeFindByChannelId(service),
     };
   }),
 );
@@ -18,10 +18,10 @@ export const UserReaderLive = Layer.effect(
 export const UserWriterLive = Layer.effect(
   UserWriter,
   Effect.gen(function* () {
-    const db = yield* DatabaseService;
+    const service = yield* DrizzleService;
     return {
-      findEntityByChannelId: makeFindEntityByChannelId(db),
-      softDelete: makeSoftDelete(db),
+      findEntityByChannelId: makeFindEntityByChannelId(service),
+      softDelete: makeSoftDelete(service),
     };
   }),
 );

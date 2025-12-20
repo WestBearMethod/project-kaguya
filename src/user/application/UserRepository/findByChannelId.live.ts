@@ -1,29 +1,26 @@
 import { eq } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
-import type { DrizzleDb } from "@/db";
 import { users } from "@/db/schema";
+import type { IDrizzleService } from "@/shared/infrastructure/db/DrizzleService";
 import { UserFound } from "@/user/application/dtos";
 import type { IUserReader } from "@/user/application/UserRepository";
 
 export const makeFindByChannelId =
-  (db: DrizzleDb): IUserReader["findByChannelId"] =>
+  (service: IDrizzleService): IUserReader["findByChannelId"] =>
   (query) =>
     Effect.gen(function* () {
-      const user = yield* Effect.tryPromise({
-        try: async () => {
-          const [result] = await db
-            .select({
-              id: users.id,
-              channelId: users.channelId,
-              deletedAt: users.deletedAt,
-            })
-            .from(users)
-            .where(eq(users.channelId, query.channelId))
-            .limit(1);
+      const user = yield* service.run(async (db) => {
+        const [result] = await db
+          .select({
+            id: users.id,
+            channelId: users.channelId,
+            deletedAt: users.deletedAt,
+          })
+          .from(users)
+          .where(eq(users.channelId, query.channelId))
+          .limit(1);
 
-          return result;
-        },
-        catch: (error) => new Error(String(error)),
+        return result;
       });
 
       if (!user) {

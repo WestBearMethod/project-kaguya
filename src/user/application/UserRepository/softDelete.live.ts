@@ -1,20 +1,24 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { Effect, Schema } from "effect";
-import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
+import {
+  DrizzleService,
+  type IDrizzleService,
+} from "@/shared/infrastructure/db/DrizzleService";
 import { DeletedUser } from "@/user/application/dtos";
 import type { IUserWriter } from "@/user/application/UserRepository";
 import type { User } from "@/user/domain/entities";
 
 export const makeSoftDelete =
-  (db: DrizzleDb): IUserWriter["softDelete"] =>
+  (service: IDrizzleService): IUserWriter["softDelete"] =>
   (user: User) =>
     Effect.gen(function* () {
       const deletedAt = user.deletedAt ?? new Date();
 
-      const deletedUser = yield* Effect.tryPromise({
-        try: async () => {
-          return await db.transaction(async (tx) => {
+      const deletedUser = yield* service.transaction(
+        Effect.gen(function* () {
+          const txService = yield* DrizzleService;
+          return yield* txService.run(async (tx) => {
             const [result] = await tx
               .update(users)
               .set({ deletedAt })
@@ -39,9 +43,10 @@ export const makeSoftDelete =
 
             return result;
           });
-        },
-        catch: (error) => new Error(String(error)),
-      });
+        }),
+      );
 
-      return yield* Schema.decodeUnknown(DeletedUser)(deletedUser);
+      return yield* Schema.decodeUnknown(DeletedUser)(deletedUser).pipe(
+        Effect.mapError((error) => new Error(String(error))),
+      );
     });

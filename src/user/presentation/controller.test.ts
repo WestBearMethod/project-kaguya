@@ -6,6 +6,7 @@ import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { AppLayerContext } from "@/shared/application/layer";
 import { DatabaseService } from "@/shared/infrastructure/db";
+import { DrizzleServiceLive } from "@/shared/infrastructure/db/DrizzleService.live";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
 import { replaceDateForTest } from "@/shared/test-utils/schema";
 import { DeleteUser } from "@/user/application/deleteUser";
@@ -39,7 +40,10 @@ describe("User API Integration Tests", () => {
   });
 
   const createTestApp = () => {
-    const appLayer = AppLayerContext.pipe(Layer.provide(TestLayer));
+    const appLayer = AppLayerContext.pipe(
+      Layer.provide(DrizzleServiceLive),
+      Layer.provide(TestLayer),
+    );
     const controller = createUserController(appLayer);
     return new Elysia().use(controller);
   };

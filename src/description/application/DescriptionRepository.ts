@@ -2,16 +2,16 @@ import { Context, type Effect, type Option } from "effect";
 import type {
   DescriptionContent,
   PaginatedDescriptionSummary,
-} from "@/application/description/dtos";
+} from "@/description/application/dtos";
 import type {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
-} from "@/application/description/queries";
+} from "@/description/application/queries";
 import type {
   Description,
   DescriptionDraft,
-} from "@/domain/description/entities";
-import type { DescriptionId } from "@/domain/description/valueObjects";
+} from "@/description/domain/entities";
+import type { DescriptionId } from "@/description/domain/valueObjects";
 
 /**
  * DescriptionReader (リードモデル/UI向け)

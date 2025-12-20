@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { DescriptionId } from "@/domain/description/valueObjects";
+import { DescriptionId } from "@/description/domain/valueObjects";
 import { ChannelId } from "@/domain/shared/valueObjects";
 
 // HTTP Params schema for delete operation

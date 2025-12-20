@@ -3,7 +3,7 @@ import {
   DescriptionCategory,
   DescriptionCursor,
   DescriptionId,
-} from "@/domain/description/valueObjects";
+} from "@/description/domain/valueObjects";
 import { ChannelId } from "@/domain/shared/valueObjects";
 
 export const GetDescriptionsQuery = Schema.Struct({

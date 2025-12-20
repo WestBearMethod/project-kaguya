@@ -1,7 +1,7 @@
 import { openapi } from "@elysiajs/openapi";
 import { JSONSchema } from "effect";
 import { Elysia } from "elysia";
-import { descriptionController } from "@/presentation/description/description";
+import { descriptionController } from "@/description/presentation/controller";
 import { healthController } from "@/presentation/health/health";
 import { userController } from "@/presentation/user/user";
 

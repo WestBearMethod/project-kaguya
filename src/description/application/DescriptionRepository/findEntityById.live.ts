@@ -1,10 +1,10 @@
 import { eq } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
-import type { IDescriptionWriter } from "@/application/description/DescriptionRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
-import { Description } from "@/domain/description/entities";
-import type { DescriptionId } from "@/domain/description/valueObjects";
+import type { IDescriptionWriter } from "@/description/application/DescriptionRepository";
+import { Description } from "@/description/domain/entities";
+import type { DescriptionId } from "@/description/domain/valueObjects";
 
 export const makeFindEntityById =
   (db: DrizzleDb): IDescriptionWriter["findEntityById"] =>

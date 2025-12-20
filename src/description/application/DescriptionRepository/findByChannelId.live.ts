@@ -1,11 +1,11 @@
 import { and, desc, eq, isNull, lt, or } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
-import type { IDescriptionReader } from "@/application/description/DescriptionRepository";
-import { PaginatedDescriptionSummary } from "@/application/description/dtos";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
-import { PAGINATION_LIMIT } from "@/domain/description/valueObjects";
-import { decodeCursor, encodeCursor } from "@/infrastructure/description/utils";
+import type { IDescriptionReader } from "@/description/application/DescriptionRepository";
+import { PaginatedDescriptionSummary } from "@/description/application/dtos";
+import { PAGINATION_LIMIT } from "@/description/domain/valueObjects";
+import { decodeCursor, encodeCursor } from "@/description/infrastructure/utils";
 
 export const makeFindByChannelId =
   (db: DrizzleDb): IDescriptionReader["findByChannelId"] =>

@@ -2,13 +2,13 @@ import { Effect, Layer } from "effect";
 import {
   DescriptionReader,
   DescriptionWriter,
-} from "@/application/description/DescriptionRepository";
+} from "@/description/application/DescriptionRepository";
+import { makeCreate } from "@/description/application/DescriptionRepository/create.live";
+import { makeFindByChannelId } from "@/description/application/DescriptionRepository/findByChannelId.live";
+import { makeFindContentById } from "@/description/application/DescriptionRepository/findContentById.live";
+import { makeFindEntityById } from "@/description/application/DescriptionRepository/findEntityById.live";
+import { makeUpdate } from "@/description/application/DescriptionRepository/update.live";
 import { DatabaseService } from "@/infrastructure/db/service";
-import { makeCreate } from "@/infrastructure/description/DescriptionRepository/create.live";
-import { makeFindByChannelId } from "@/infrastructure/description/DescriptionRepository/findByChannelId.live";
-import { makeFindContentById } from "@/infrastructure/description/DescriptionRepository/findContentById.live";
-import { makeFindEntityById } from "@/infrastructure/description/DescriptionRepository/findEntityById.live";
-import { makeUpdate } from "@/infrastructure/description/DescriptionRepository/update.live";
 
 export const DescriptionReaderLive = Layer.effect(
   DescriptionReader,

@@ -1,9 +1,9 @@
 import { Schema } from "effect";
-import { Description } from "@/domain/description/entities";
+import { Description } from "@/description/domain/entities";
 import {
   DescriptionCategory,
   DescriptionId,
-} from "@/domain/description/valueObjects";
+} from "@/description/domain/valueObjects";
 import { ChannelId } from "@/domain/shared/valueObjects";
 
 export const CreateDescriptionCommand = Description.pipe(

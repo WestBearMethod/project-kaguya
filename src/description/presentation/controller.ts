@@ -1,20 +1,20 @@
 import { Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
+import { AppLayer } from "@/application/layer";
 import {
   CreateDescriptionCommand,
   type DeleteDescriptionCommand,
-} from "@/application/description/commands";
-import { DeleteDescription } from "@/application/description/deleteDescription";
-import { DescriptionContent } from "@/application/description/dtos";
-import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
-import { GetDescriptions } from "@/application/description/getDescriptions";
+} from "@/description/application/commands";
+import { DeleteDescription } from "@/description/application/deleteDescription";
+import { DescriptionContent } from "@/description/application/dtos";
+import { GetDescriptionContent } from "@/description/application/getDescriptionContent";
+import { GetDescriptions } from "@/description/application/getDescriptions";
 import {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
-} from "@/application/description/queries";
-import { SaveDescription } from "@/application/description/saveDescription";
-import { AppLayer } from "@/application/layer";
-import { Description } from "@/domain/description/entities";
+} from "@/description/application/queries";
+import { SaveDescription } from "@/description/application/saveDescription";
+import { Description } from "@/description/domain/entities";
 import { logCauseInProduction } from "@/infrastructure/logger";
 import { DeleteDescriptionBody, DeleteDescriptionParams } from "./requests";
 import { GetDescriptionsResponse } from "./responses";

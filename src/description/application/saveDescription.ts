@@ -1,10 +1,10 @@
 import { Context, Effect, Layer, Schema } from "effect";
-import type { CreateDescriptionCommand } from "@/application/description/commands";
-import { DescriptionWriter } from "@/application/description/DescriptionRepository";
+import type { CreateDescriptionCommand } from "@/description/application/commands";
+import { DescriptionWriter } from "@/description/application/DescriptionRepository";
 import {
   type Description,
   DescriptionDraft,
-} from "@/domain/description/entities";
+} from "@/description/domain/entities";
 
 export class SaveDescription extends Context.Tag("SaveDescription")<
   SaveDescription,

@@ -1,14 +1,14 @@
 import { Layer } from "effect";
-import { DeleteDescription } from "@/application/description/deleteDescription";
-import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
-import { GetDescriptions } from "@/application/description/getDescriptions";
-import { SaveDescription } from "@/application/description/saveDescription";
 import { DeleteUser } from "@/application/user/deleteUser";
-import { DatabaseServiceLive } from "@/infrastructure/db/service";
 import {
   DescriptionReaderLive,
   DescriptionWriterLive,
-} from "@/infrastructure/description/DescriptionRepository.live";
+} from "@/description/application/DescriptionRepository.live";
+import { DeleteDescription } from "@/description/application/deleteDescription";
+import { GetDescriptionContent } from "@/description/application/getDescriptionContent";
+import { GetDescriptions } from "@/description/application/getDescriptions";
+import { SaveDescription } from "@/description/application/saveDescription";
+import { DatabaseServiceLive } from "@/infrastructure/db/service";
 import {
   UserReaderLive,
   UserWriterLive,

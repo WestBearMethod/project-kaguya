@@ -9,34 +9,34 @@ import {
 import { eq } from "drizzle-orm";
 import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
-import {
-  DescriptionReader,
-  DescriptionWriter,
-} from "@/application/description/DescriptionRepository";
-import { DeleteDescription } from "@/application/description/deleteDescription";
-import {
-  DescriptionContent,
-  DescriptionSummary as DescriptionSummaryActual,
-} from "@/application/description/dtos";
-import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
-import { GetDescriptions } from "@/application/description/getDescriptions";
-import type {
-  GetDescriptionContentQuery,
-  GetDescriptionsQuery,
-} from "@/application/description/queries";
-import { SaveDescription } from "@/application/description/saveDescription";
 import { AppLayerContext } from "@/application/layer";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import {
+  DescriptionReader,
+  DescriptionWriter,
+} from "@/description/application/DescriptionRepository";
+import { DeleteDescription } from "@/description/application/deleteDescription";
+import {
+  DescriptionContent,
+  DescriptionSummary as DescriptionSummaryActual,
+} from "@/description/application/dtos";
+import { GetDescriptionContent } from "@/description/application/getDescriptionContent";
+import { GetDescriptions } from "@/description/application/getDescriptions";
+import type {
+  GetDescriptionContentQuery,
+  GetDescriptionsQuery,
+} from "@/description/application/queries";
+import { SaveDescription } from "@/description/application/saveDescription";
+import {
   Description as DescriptionActual,
   type DescriptionDraft,
-} from "@/domain/description/entities";
-import type { DescriptionId } from "@/domain/description/valueObjects";
+} from "@/description/domain/entities";
+import type { DescriptionId } from "@/description/domain/valueObjects";
+import { createDescriptionController } from "@/description/presentation/controller";
+import { ErrorSchema } from "@/description/presentation/schemas";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { setupTestDb } from "@/infrastructure/db/test";
-import { createDescriptionController } from "@/presentation/description/description";
-import { ErrorSchema } from "@/presentation/description/schemas";
 import {
   replaceDateForTest,
   replaceNullableDateForTest,

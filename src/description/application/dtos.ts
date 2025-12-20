@@ -1,9 +1,9 @@
 import { Schema } from "effect";
-import { Description } from "@/domain/description/entities";
+import { Description } from "@/description/domain/entities";
 import {
   DescriptionContentText,
   DescriptionCursor,
-} from "@/domain/description/valueObjects";
+} from "@/description/domain/valueObjects";
 
 export const DescriptionSummary = Description.pipe(
   Schema.omit("content", "channelId", "deletedAt"),

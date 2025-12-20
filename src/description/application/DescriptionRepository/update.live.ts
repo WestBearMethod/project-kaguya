@@ -1,8 +1,8 @@
 import { Effect, Schema } from "effect";
-import type { IDescriptionWriter } from "@/application/description/DescriptionRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
-import { Description } from "@/domain/description/entities";
+import type { IDescriptionWriter } from "@/description/application/DescriptionRepository";
+import { Description } from "@/description/domain/entities";
 
 export const makeUpdate =
   (db: DrizzleDb): IDescriptionWriter["update"] =>

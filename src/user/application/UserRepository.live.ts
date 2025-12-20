@@ -1,5 +1,5 @@
 import { Effect, Layer } from "effect";
-import { DatabaseService } from "@/infrastructure/db/service";
+import { DatabaseService } from "@/shared/infrastructure/db";
 import { UserReader, UserWriter } from "@/user/application/UserRepository";
 import { makeFindByChannelId } from "@/user/application/UserRepository/findByChannelId.live";
 import { makeFindEntityByChannelId } from "@/user/application/UserRepository/findEntityByChannelId.live";

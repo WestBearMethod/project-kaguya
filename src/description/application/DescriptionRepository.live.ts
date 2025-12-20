@@ -8,7 +8,7 @@ import { makeFindByChannelId } from "@/description/application/DescriptionReposi
 import { makeFindContentById } from "@/description/application/DescriptionRepository/findContentById.live";
 import { makeFindEntityById } from "@/description/application/DescriptionRepository/findEntityById.live";
 import { makeUpdate } from "@/description/application/DescriptionRepository/update.live";
-import { DatabaseService } from "@/infrastructure/db/service";
+import { DatabaseService } from "@/shared/infrastructure/db";
 
 export const DescriptionReaderLive = Layer.effect(
   DescriptionReader,

@@ -1,7 +1,7 @@
 import { Cause, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import { AppLayer } from "@/application/layer";
-import { logCauseInProduction } from "@/infrastructure/logger";
+import { logCauseInProduction } from "@/shared/logger";
 import { DeleteUserCommand } from "@/user/application/commands";
 import { DeleteUser } from "@/user/application/deleteUser";
 import {

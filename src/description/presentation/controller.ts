@@ -15,7 +15,7 @@ import {
 } from "@/description/application/queries";
 import { SaveDescription } from "@/description/application/saveDescription";
 import { Description } from "@/description/domain/entities";
-import { logCauseInProduction } from "@/infrastructure/logger";
+import { logCauseInProduction } from "@/shared/logger";
 import { DeleteDescriptionBody, DeleteDescriptionParams } from "./requests";
 import { GetDescriptionsResponse } from "./responses";
 import { ErrorSchema } from "./schemas";

@@ -35,8 +35,8 @@ import {
 import type { DescriptionId } from "@/description/domain/valueObjects";
 import { createDescriptionController } from "@/description/presentation/controller";
 import { ErrorSchema } from "@/description/presentation/schemas";
-import { DatabaseService } from "@/infrastructure/db/service";
-import { setupTestDb } from "@/infrastructure/db/test";
+import { DatabaseService } from "@/shared/infrastructure/db";
+import { setupTestDb } from "@/shared/infrastructure/db.test";
 import {
   replaceDateForTest,
   replaceNullableDateForTest,

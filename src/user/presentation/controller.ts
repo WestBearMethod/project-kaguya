@@ -1,16 +1,16 @@
 import { Cause, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import { AppLayer } from "@/application/layer";
-import { DeleteUserCommand } from "@/application/user/commands";
-import { DeleteUser } from "@/application/user/deleteUser";
+import { logCauseInProduction } from "@/infrastructure/logger";
+import { DeleteUserCommand } from "@/user/application/commands";
+import { DeleteUser } from "@/user/application/deleteUser";
 import {
   UserAlreadyDeletedError,
   UserNotFoundError,
-} from "@/domain/user/errors";
-import { logCauseInProduction } from "@/infrastructure/logger";
-import { DeleteUserParams } from "@/presentation/user/requests";
-import { DeleteUserResponse } from "@/presentation/user/responses";
-import { ErrorSchema } from "@/presentation/user/schemas";
+} from "@/user/domain/errors";
+import { DeleteUserParams } from "@/user/presentation/requests";
+import { DeleteUserResponse } from "@/user/presentation/responses";
+import { ErrorSchema } from "@/user/presentation/schemas";
 
 export const createUserController = (
   appLayer: Layer.Layer<DeleteUser, never, never>,

@@ -3,7 +3,7 @@ import { JSONSchema } from "effect";
 import { Elysia } from "elysia";
 import { descriptionController } from "@/description/presentation/controller";
 import { healthController } from "@/presentation/health/health";
-import { userController } from "@/presentation/user/user";
+import { userController } from "@/user/presentation/controller";
 
 const app = new Elysia();
 

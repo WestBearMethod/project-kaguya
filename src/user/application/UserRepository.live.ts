@@ -1,8 +1,8 @@
 import { Effect, Layer } from "effect";
-import { UserReader, UserWriter } from "@/application/user/UserRepository";
 import { DatabaseService } from "@/infrastructure/db/service";
-import { makeFindByChannelId } from "@/infrastructure/user/UserRepository/findByChannelId.live";
-import { makeSoftDeleteWithDescriptions } from "@/infrastructure/user/UserRepository/softDeleteWithDescriptions.live";
+import { UserReader, UserWriter } from "@/user/application/UserRepository";
+import { makeFindByChannelId } from "@/user/application/UserRepository/findByChannelId.live";
+import { makeSoftDeleteWithDescriptions } from "@/user/application/UserRepository/softDeleteWithDescriptions.live";
 
 export const UserReaderLive = Layer.effect(
   UserReader,

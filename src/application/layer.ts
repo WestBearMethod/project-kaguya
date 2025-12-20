@@ -1,5 +1,4 @@
 import { Layer } from "effect";
-import { DeleteUser } from "@/application/user/deleteUser";
 import {
   DescriptionReaderLive,
   DescriptionWriterLive,
@@ -9,10 +8,11 @@ import { GetDescriptionContent } from "@/description/application/getDescriptionC
 import { GetDescriptions } from "@/description/application/getDescriptions";
 import { SaveDescription } from "@/description/application/saveDescription";
 import { DatabaseServiceLive } from "@/infrastructure/db/service";
+import { DeleteUser } from "@/user/application/deleteUser";
 import {
   UserReaderLive,
   UserWriterLive,
-} from "@/infrastructure/user/UserRepository/UserRepository.live";
+} from "@/user/application/UserRepository.live";
 
 export const UseCasesLive = Layer.mergeAll(
   SaveDescription.Live,

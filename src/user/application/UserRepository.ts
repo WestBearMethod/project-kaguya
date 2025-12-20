@@ -1,5 +1,5 @@
 import { Context, type Effect, type Option } from "effect";
-import type { UserDomainError } from "@/domain/user/errors";
+import type { UserDomainError } from "@/user/domain/errors";
 import type { DeleteUserCommand } from "./commands";
 import type { DeletedUser, UserFound } from "./dtos";
 import type { GetUserByChannelIdQuery } from "./queries";

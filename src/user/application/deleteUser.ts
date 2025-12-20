@@ -1,14 +1,14 @@
 import { Context, Effect, Layer, Option, Schema } from "effect";
-import type { DeleteUserCommand } from "@/application/user/commands";
-import type { DeletedUser } from "@/application/user/dtos";
-import { GetUserByChannelIdQuery } from "@/application/user/queries";
-import { UserReader, UserWriter } from "@/application/user/UserRepository";
-import { isUserDeleted } from "@/domain/user/entities";
+import type { DeleteUserCommand } from "@/user/application/commands";
+import type { DeletedUser } from "@/user/application/dtos";
+import { GetUserByChannelIdQuery } from "@/user/application/queries";
+import { UserReader, UserWriter } from "@/user/application/UserRepository";
+import { isUserDeleted } from "@/user/domain/entities";
 import {
   UserAlreadyDeletedError,
   type UserDomainError,
   UserNotFoundError,
-} from "@/domain/user/errors";
+} from "@/user/domain/errors";
 
 export class DeleteUser extends Context.Tag("DeleteUser")<
   DeleteUser,

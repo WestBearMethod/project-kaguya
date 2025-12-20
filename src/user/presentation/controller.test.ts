@@ -3,18 +3,18 @@ import { eq } from "drizzle-orm";
 import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
 import { AppLayerContext } from "@/application/layer";
-import type { DeleteUserCommand } from "@/application/user/commands";
-import { DeleteUser } from "@/application/user/deleteUser";
-import type { GetUserByChannelIdQuery } from "@/application/user/queries";
-import { UserReader, UserWriter } from "@/application/user/UserRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { setupTestDb } from "@/infrastructure/db/test";
-import { DeleteUserResponse as DeleteUserResponseActual } from "@/presentation/user/responses";
-import { ErrorSchema } from "@/presentation/user/schemas";
-import { createUserController } from "@/presentation/user/user";
 import { replaceDateForTest } from "@/test-utils/schema";
+import type { DeleteUserCommand } from "@/user/application/commands";
+import { DeleteUser } from "@/user/application/deleteUser";
+import type { GetUserByChannelIdQuery } from "@/user/application/queries";
+import { UserReader, UserWriter } from "@/user/application/UserRepository";
+import { createUserController } from "@/user/presentation/controller";
+import { DeleteUserResponse as DeleteUserResponseActual } from "@/user/presentation/responses";
+import { ErrorSchema } from "@/user/presentation/schemas";
 
 const BASE_URL = "http://localhost";
 

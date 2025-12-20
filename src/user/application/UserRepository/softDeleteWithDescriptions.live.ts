@@ -1,9 +1,9 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { Effect, Schema } from "effect";
-import { DeletedUser } from "@/application/user/dtos";
-import type { IUserWriter } from "@/application/user/UserRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
+import { DeletedUser } from "@/user/application/dtos";
+import type { IUserWriter } from "@/user/application/UserRepository";
 
 export const makeSoftDeleteWithDescriptions =
   (db: DrizzleDb): IUserWriter["softDeleteWithDescriptions"] =>

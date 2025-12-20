@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
-import { UserFound } from "@/application/user/dtos";
-import type { IUserReader } from "@/application/user/UserRepository";
 import type { DrizzleDb } from "@/db";
 import { users } from "@/db/schema";
+import { UserFound } from "@/user/application/dtos";
+import type { IUserReader } from "@/user/application/UserRepository";
 
 export const makeFindByChannelId =
   (db: DrizzleDb): IUserReader["findByChannelId"] =>

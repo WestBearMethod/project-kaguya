@@ -9,27 +9,27 @@ import {
 import { eq } from "drizzle-orm";
 import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
+import type {
+  CreateDescriptionCommand,
+  DeleteDescriptionCommand,
+} from "@/application/description/commands";
+import { DescriptionRepository } from "@/application/description/DescriptionRepository";
 import { DeleteDescription } from "@/application/description/deleteDescription";
+import {
+  DescriptionContent,
+  DescriptionSummary as DescriptionSummaryActual,
+} from "@/application/description/dtos";
 import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
 import { GetDescriptions } from "@/application/description/getDescriptions";
+import type {
+  GetDescriptionContentQuery,
+  GetDescriptionsQuery,
+} from "@/application/description/queries";
 import { SaveDescription } from "@/application/description/saveDescription";
 import { AppLayerContext } from "@/application/layer";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
-import type {
-  CreateDescriptionCommand,
-  DeleteDescriptionCommand,
-} from "@/domain/description/commands";
-import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
-import {
-  DescriptionContent,
-  DescriptionSummary as DescriptionSummaryActual,
-} from "@/domain/description/dtos";
 import { Description as DescriptionActual } from "@/domain/description/entities";
-import type {
-  GetDescriptionContentQuery,
-  GetDescriptionsQuery,
-} from "@/domain/description/queries";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { setupTestDb } from "@/infrastructure/db/test";
 import { createDescriptionController } from "@/presentation/description/description";

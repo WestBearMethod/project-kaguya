@@ -1,7 +1,7 @@
 import { Effect, Schema } from "effect";
+import type { IDescriptionRepository } from "@/application/description/DescriptionRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
-import type { IDescriptionRepository } from "@/domain/description/DescriptionRepository";
 import { Description } from "@/domain/description/entities";
 
 export const makeSave =

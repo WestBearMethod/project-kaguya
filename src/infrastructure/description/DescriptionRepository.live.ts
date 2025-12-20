@@ -1,5 +1,5 @@
 import { Effect, Layer } from "effect";
-import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
+import { DescriptionRepository } from "@/application/description/DescriptionRepository";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { makeFindByChannelId } from "@/infrastructure/description/DescriptionRepository/findByChannelId.live";
 import { makeFindById } from "@/infrastructure/description/DescriptionRepository/findById.live";

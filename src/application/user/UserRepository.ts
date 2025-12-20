@@ -1,7 +1,7 @@
 import { Context, type Effect, type Option } from "effect";
-import type { DeleteUserCommand } from "@/domain/user/commands";
+import type { UserDomainError } from "@/domain/user/errors";
+import type { DeleteUserCommand } from "./commands";
 import type { DeletedUser, UserFound } from "./dtos";
-import type { UserDomainError } from "./errors";
 import type { GetUserByChannelIdQuery } from "./queries";
 
 export interface IUserRepository {

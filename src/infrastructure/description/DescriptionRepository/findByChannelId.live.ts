@@ -1,9 +1,9 @@
 import { and, desc, eq, isNull, lt, or } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
+import type { IDescriptionRepository } from "@/application/description/DescriptionRepository";
+import { PaginatedDescriptionSummary } from "@/application/description/dtos";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
-import type { IDescriptionRepository } from "@/domain/description/DescriptionRepository";
-import { PaginatedDescriptionSummary } from "@/domain/description/dtos";
 import { PAGINATION_LIMIT } from "@/domain/description/valueObjects";
 import { decodeCursor, encodeCursor } from "@/infrastructure/description/utils";
 

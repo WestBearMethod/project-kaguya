@@ -1,13 +1,14 @@
 import { Context, Effect, Layer, Option, Schema } from "effect";
-import type { DeleteUserCommand } from "@/domain/user/commands";
-import type { DeletedUser } from "@/domain/user/dtos";
+import type { DeleteUserCommand } from "@/application/user/commands";
+import type { DeletedUser } from "@/application/user/dtos";
+import { GetUserByChannelIdQuery } from "@/application/user/queries";
+import { UserRepository } from "@/application/user/UserRepository";
+import { isUserDeleted } from "@/domain/user/entities";
 import {
   UserAlreadyDeletedError,
   type UserDomainError,
   UserNotFoundError,
 } from "@/domain/user/errors";
-import { GetUserByChannelIdQuery } from "@/domain/user/queries";
-import { UserRepository } from "@/domain/user/UserRepository";
 
 export class DeleteUser extends Context.Tag("DeleteUser")<
   DeleteUser,
@@ -37,7 +38,7 @@ export class DeleteUser extends Context.Tag("DeleteUser")<
               onSome: (user) => Effect.succeed(user),
             });
 
-            if (user.deletedAt) {
+            if (isUserDeleted(user)) {
               return yield* Effect.fail(
                 new UserAlreadyDeletedError({ channelId: query.channelId }),
               );

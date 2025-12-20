@@ -1,8 +1,8 @@
 import { Cause, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import { AppLayer } from "@/application/layer";
+import { DeleteUserCommand } from "@/application/user/commands";
 import { DeleteUser } from "@/application/user/deleteUser";
-import { DeleteUserCommand } from "@/domain/user/commands";
 import {
   UserAlreadyDeletedError,
   UserNotFoundError,

@@ -2,19 +2,18 @@ import { Context, type Effect, type Option } from "effect";
 import type {
   CreateDescriptionCommand,
   DeleteDescriptionCommand,
-} from "./commands";
-import type { DescriptionContent, PaginatedDescriptionSummary } from "./dtos";
-import type { Description } from "./entities";
+} from "@/application/description/commands";
+import type {
+  DescriptionContent,
+  PaginatedDescriptionSummary,
+} from "@/application/description/dtos";
 import type {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
-} from "./queries";
+} from "@/application/description/queries";
+import type { Description } from "@/domain/description/entities";
 
 export interface IDescriptionRepository {
-  readonly save: (
-    command: CreateDescriptionCommand,
-  ) => Effect.Effect<Description, Error>;
-
   readonly findByChannelId: (
     query: GetDescriptionsQuery,
   ) => Effect.Effect<PaginatedDescriptionSummary, Error>;
@@ -22,6 +21,10 @@ export interface IDescriptionRepository {
   readonly findById: (
     query: GetDescriptionContentQuery,
   ) => Effect.Effect<Option.Option<DescriptionContent>, Error>;
+
+  readonly save: (
+    command: CreateDescriptionCommand,
+  ) => Effect.Effect<Description, Error>;
 
   readonly softDelete: (
     command: DeleteDescriptionCommand,

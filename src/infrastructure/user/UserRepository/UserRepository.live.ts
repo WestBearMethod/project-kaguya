@@ -1,5 +1,5 @@
 import { Effect, Layer } from "effect";
-import { UserRepository } from "@/domain/user/UserRepository";
+import { UserRepository } from "@/application/user/UserRepository";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { makeFindByChannelId } from "@/infrastructure/user/UserRepository/findByChannelId.live";
 import { makeSoftDeleteWithDescriptions } from "@/infrastructure/user/UserRepository/softDeleteWithDescriptions.live";

@@ -1,27 +1,15 @@
 import { Schema } from "effect";
-import { ChannelId } from "../shared/valueObjects";
 import {
   DescriptionCategory,
   DescriptionCursor,
   DescriptionId,
-} from "./valueObjects";
+} from "@/domain/description/valueObjects";
+import { ChannelId } from "@/domain/shared/valueObjects";
 
 export const GetDescriptionsQuery = Schema.Struct({
   channelId: ChannelId,
-  cursor: Schema.optional(DescriptionCursor),
-  category: Schema.optional(
-    Schema.transform(
-      Schema.Union(
-        Schema.NullOr(DescriptionCategory),
-        Schema.Literal("null", ""),
-      ),
-      Schema.NullOr(DescriptionCategory),
-      {
-        decode: (input) => (input === "null" || input === "" ? null : input),
-        encode: (input) => input,
-      },
-    ),
-  ),
+  category: Schema.optional(Schema.NullOr(DescriptionCategory)),
+  cursor: Schema.optional(Schema.NullOr(DescriptionCursor)),
 });
 
 export interface GetDescriptionsQuery

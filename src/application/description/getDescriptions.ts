@@ -1,7 +1,7 @@
 import { Context, Effect, Layer } from "effect";
-import { DescriptionRepository } from "@/domain/description/DescriptionRepository";
-import type { PaginatedDescriptionSummary } from "@/domain/description/dtos";
-import type { GetDescriptionsQuery } from "@/domain/description/queries";
+import { DescriptionRepository } from "@/application/description/DescriptionRepository";
+import type { PaginatedDescriptionSummary } from "@/application/description/dtos";
+import type { GetDescriptionsQuery } from "@/application/description/queries";
 
 export class GetDescriptions extends Context.Tag("GetDescriptions")<
   GetDescriptions,

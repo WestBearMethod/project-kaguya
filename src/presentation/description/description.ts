@@ -1,27 +1,24 @@
-import { Chunk, Effect, Exit, type Layer, Option, Schema } from "effect";
+import { Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
-import { DeleteDescription } from "@/application/description/deleteDescription";
-import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
-import { GetDescriptions } from "@/application/description/getDescriptions";
-import { SaveDescription } from "@/application/description/saveDescription";
-import { AppLayer } from "@/application/layer";
 import {
   CreateDescriptionCommand,
   type DeleteDescriptionCommand,
-} from "@/domain/description/commands";
-import { DescriptionContent } from "@/domain/description/dtos";
-import { Description } from "@/domain/description/entities";
+} from "@/application/description/commands";
+import { DeleteDescription } from "@/application/description/deleteDescription";
+import { DescriptionContent } from "@/application/description/dtos";
+import { GetDescriptionContent } from "@/application/description/getDescriptionContent";
+import { GetDescriptions } from "@/application/description/getDescriptions";
 import {
   GetDescriptionContentQuery,
   GetDescriptionsQuery,
-} from "@/domain/description/queries";
+} from "@/application/description/queries";
+import { SaveDescription } from "@/application/description/saveDescription";
+import { AppLayer } from "@/application/layer";
+import { Description } from "@/domain/description/entities";
 import { logCauseInProduction } from "@/infrastructure/logger";
-import {
-  DeleteDescriptionBody,
-  DeleteDescriptionParams,
-} from "@/presentation/description/requests";
-import { GetDescriptionsResponse } from "@/presentation/description/responses";
-import { ErrorSchema } from "@/presentation/description/schemas";
+import { DeleteDescriptionBody, DeleteDescriptionParams } from "./requests";
+import { GetDescriptionsResponse } from "./responses";
+import { ErrorSchema } from "./schemas";
 
 export const createDescriptionController = (
   appLayer: Layer.Layer<
@@ -67,7 +64,7 @@ export const createDescriptionController = (
           const useCase = yield* GetDescriptions;
           const summary = yield* useCase.execute(query);
           return yield* Schema.encode(GetDescriptionsResponse)({
-            items: Chunk.toReadonlyArray(summary.items),
+            items: summary.items,
             nextCursor: summary.nextCursor,
           });
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);

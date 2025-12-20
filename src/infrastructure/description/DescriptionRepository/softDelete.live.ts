@@ -1,8 +1,8 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { Effect, Schema } from "effect";
+import type { IDescriptionRepository } from "@/application/description/DescriptionRepository";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
-import type { IDescriptionRepository } from "@/domain/description/DescriptionRepository";
 import { Description } from "@/domain/description/entities";
 
 export const makeSoftDelete =

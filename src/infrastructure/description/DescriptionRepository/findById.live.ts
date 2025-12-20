@@ -1,9 +1,9 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
+import type { IDescriptionRepository } from "@/application/description/DescriptionRepository";
+import { DescriptionContent } from "@/application/description/dtos";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
-import type { IDescriptionRepository } from "@/domain/description/DescriptionRepository";
-import { DescriptionContent } from "@/domain/description/dtos";
 
 export const makeFindById =
   (db: DrizzleDb): IDescriptionRepository["findById"] =>

@@ -5,4 +5,5 @@ export const DeleteUserCommand = Schema.Struct({
   channelId: ChannelId,
 });
 
-export type DeleteUserCommand = Schema.Schema.Type<typeof DeleteUserCommand>;
+export interface DeleteUserCommand
+  extends Schema.Schema.Type<typeof DeleteUserCommand> {}

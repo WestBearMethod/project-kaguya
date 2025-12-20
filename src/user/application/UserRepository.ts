@@ -1,5 +1,5 @@
 import { Context, type Effect, type Option } from "effect";
-import type { ChannelId } from "@/domain/shared/valueObjects";
+import type { ChannelId } from "@/shared/domain/valueObjects";
 import type { DeletedUser, UserFound } from "@/user/application/dtos";
 import type { GetUserByChannelIdQuery } from "@/user/application/queries";
 import type { User } from "@/user/domain/entities";

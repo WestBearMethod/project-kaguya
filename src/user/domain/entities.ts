@@ -1,6 +1,6 @@
 import { type Effect, type ParseResult, Schema } from "effect";
-import { AnnotatedDateFromSelf } from "@/domain/shared/primitives";
-import { ChannelId, UserId } from "@/domain/shared/valueObjects";
+import { AnnotatedDateFromSelf } from "@/shared/domain/primitives";
+import { ChannelId, UserId } from "@/shared/domain/valueObjects";
 
 /**
  * User Entity: The core domain entity representing a User

@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { Effect, Option, Schema } from "effect";
 import type { DrizzleDb } from "@/db";
 import { users } from "@/db/schema";
-import type { ChannelId } from "@/domain/shared/valueObjects";
+import type { ChannelId } from "@/shared/domain/valueObjects";
 import type { IUserWriter } from "@/user/application/UserRepository";
 import { User } from "@/user/domain/entities";
 

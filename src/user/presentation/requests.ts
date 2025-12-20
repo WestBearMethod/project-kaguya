@@ -1,5 +1,5 @@
 import { Schema } from "effect";
-import { ChannelId } from "@/domain/shared/valueObjects";
+import { ChannelId } from "@/shared/domain/valueObjects";
 
 export const DeleteUserParams = Schema.Struct({
   channelId: ChannelId,

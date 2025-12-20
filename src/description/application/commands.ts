@@ -4,7 +4,7 @@ import {
   DescriptionCategory,
   DescriptionId,
 } from "@/description/domain/valueObjects";
-import { ChannelId } from "@/domain/shared/valueObjects";
+import { ChannelId } from "@/shared/domain/valueObjects";
 
 export const CreateDescriptionCommand = Description.pipe(
   Schema.omit("id", "createdAt", "deletedAt", "category"),

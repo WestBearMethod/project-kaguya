@@ -4,7 +4,7 @@ import {
   DescriptionCursor,
   DescriptionId,
 } from "@/description/domain/valueObjects";
-import { ChannelId } from "@/domain/shared/valueObjects";
+import { ChannelId } from "@/shared/domain/valueObjects";
 
 export const GetDescriptionsQuery = Schema.Struct({
   channelId: ChannelId,

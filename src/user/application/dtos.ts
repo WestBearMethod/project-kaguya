@@ -1,6 +1,6 @@
 import { Schema } from "effect";
-import { AnnotatedDateFromSelf } from "@/domain/shared/primitives";
-import { ChannelId, UserId } from "@/domain/shared/valueObjects";
+import { AnnotatedDateFromSelf } from "@/shared/domain/primitives";
+import { ChannelId, UserId } from "@/shared/domain/valueObjects";
 
 export const UserFound = Schema.Struct({
   id: UserId,

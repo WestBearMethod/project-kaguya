@@ -1,7 +1,10 @@
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Schema } from "effect";
 import type { CreateDescriptionCommand } from "@/application/description/commands";
 import { DescriptionWriter } from "@/application/description/DescriptionRepository";
-import type { Description } from "@/domain/description/entities";
+import {
+  type Description,
+  DescriptionDraft,
+} from "@/domain/description/entities";
 
 export class SaveDescription extends Context.Tag("SaveDescription")<
   SaveDescription,
@@ -17,7 +20,16 @@ export class SaveDescription extends Context.Tag("SaveDescription")<
       const repository = yield* DescriptionWriter;
       return {
         execute: (command: CreateDescriptionCommand) =>
-          repository.save(command),
+          Effect.gen(function* () {
+            // Memory-level Validation & Construction of the Draft
+            // Identity (ID) and timestamps will be assigned by the DB
+            const draft = yield* Schema.decodeUnknown(DescriptionDraft)({
+              ...command,
+              category: command.category ?? null,
+            }).pipe(Effect.mapError((error) => new Error(String(error))));
+
+            return yield* repository.create(draft);
+          }),
       };
     }),
   );

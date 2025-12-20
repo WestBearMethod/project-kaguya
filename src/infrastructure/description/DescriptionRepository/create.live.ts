@@ -4,25 +4,25 @@ import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { Description } from "@/domain/description/entities";
 
-export const makeSave =
-  (db: DrizzleDb): IDescriptionWriter["save"] =>
-  (command) =>
+export const makeCreate =
+  (db: DrizzleDb): IDescriptionWriter["create"] =>
+  (draft) =>
     Effect.gen(function* () {
       const result = yield* Effect.tryPromise({
         try: async () => {
           // Ensure user exists
           await db
             .insert(users)
-            .values({ channelId: command.channelId })
+            .values({ channelId: draft.channelId })
             .onConflictDoNothing({ target: users.channelId });
 
           const [saved] = await db
             .insert(descriptions)
             .values({
-              title: command.title,
-              content: command.content,
-              category: command.category,
-              channelId: command.channelId,
+              title: draft.title,
+              content: draft.content,
+              category: draft.category,
+              channelId: draft.channelId,
             })
             .returning();
 

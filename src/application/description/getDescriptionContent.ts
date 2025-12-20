@@ -15,7 +15,7 @@ export class GetDescriptionContent extends Context.Tag("GetDescriptionContent")<
     GetDescriptionContent,
     Effect.gen(function* () {
       const repository = yield* DescriptionReader;
-      return { execute: (query) => repository.findById(query) };
+      return { execute: (query) => repository.findContentById(query) };
     }),
   );
 }

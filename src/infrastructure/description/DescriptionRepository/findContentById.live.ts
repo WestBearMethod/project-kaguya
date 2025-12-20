@@ -5,8 +5,8 @@ import { DescriptionContent } from "@/application/description/dtos";
 import type { DrizzleDb } from "@/db";
 import { descriptions } from "@/db/schema";
 
-export const makeFindById =
-  (db: DrizzleDb): IDescriptionReader["findById"] =>
+export const makeFindContentById =
+  (db: DrizzleDb): IDescriptionReader["findContentById"] =>
   (query) =>
     Effect.gen(function* () {
       const maybeResult = yield* Effect.tryPromise({

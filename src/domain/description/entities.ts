@@ -23,3 +23,14 @@ export const Description = Schema.Struct({
 
 // Type definition inferred from schema
 export interface Description extends Schema.Schema.Type<typeof Description> {}
+
+/**
+ * DescriptionDraft: Data structure for creating a new Description.
+ * It has the same validation rules as Description but without the ID and timestamps.
+ */
+export const DescriptionDraft = Description.pipe(
+  Schema.omit("id", "createdAt", "deletedAt"),
+);
+
+export interface DescriptionDraft
+  extends Schema.Schema.Type<typeof DescriptionDraft> {}

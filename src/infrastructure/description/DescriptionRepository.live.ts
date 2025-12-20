@@ -4,10 +4,11 @@ import {
   DescriptionWriter,
 } from "@/application/description/DescriptionRepository";
 import { DatabaseService } from "@/infrastructure/db/service";
+import { makeCreate } from "@/infrastructure/description/DescriptionRepository/create.live";
 import { makeFindByChannelId } from "@/infrastructure/description/DescriptionRepository/findByChannelId.live";
-import { makeFindById } from "@/infrastructure/description/DescriptionRepository/findById.live";
-import { makeSave } from "@/infrastructure/description/DescriptionRepository/save.live";
-import { makeSoftDelete } from "@/infrastructure/description/DescriptionRepository/softDelete.live";
+import { makeFindContentById } from "@/infrastructure/description/DescriptionRepository/findContentById.live";
+import { makeFindEntityById } from "@/infrastructure/description/DescriptionRepository/findEntityById.live";
+import { makeUpdate } from "@/infrastructure/description/DescriptionRepository/update.live";
 
 export const DescriptionReaderLive = Layer.effect(
   DescriptionReader,
@@ -15,7 +16,7 @@ export const DescriptionReaderLive = Layer.effect(
     const db = yield* DatabaseService;
     return {
       findByChannelId: makeFindByChannelId(db),
-      findById: makeFindById(db),
+      findContentById: makeFindContentById(db),
     };
   }),
 );
@@ -24,9 +25,12 @@ export const DescriptionWriterLive = Layer.effect(
   DescriptionWriter,
   Effect.gen(function* () {
     const db = yield* DatabaseService;
+    const update = makeUpdate(db);
     return {
-      save: makeSave(db),
-      softDelete: makeSoftDelete(db),
+      create: makeCreate(db),
+      update,
+      softDelete: update,
+      findEntityById: makeFindEntityById(db),
     };
   }),
 );

@@ -9,15 +9,10 @@ import {
 import { eq } from "drizzle-orm";
 import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
-import type {
-  CreateDescriptionCommand,
-  DeleteDescriptionCommand,
-} from "@/application/description/commands";
 import {
   DescriptionReader,
   DescriptionWriter,
 } from "@/application/description/DescriptionRepository";
-
 import { DeleteDescription } from "@/application/description/deleteDescription";
 import {
   DescriptionContent,
@@ -33,7 +28,11 @@ import { SaveDescription } from "@/application/description/saveDescription";
 import { AppLayerContext } from "@/application/layer";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
-import { Description as DescriptionActual } from "@/domain/description/entities";
+import {
+  Description as DescriptionActual,
+  type DescriptionDraft,
+} from "@/domain/description/entities";
+import type { DescriptionId } from "@/domain/description/valueObjects";
 import { DatabaseService } from "@/infrastructure/db/service";
 import { setupTestDb } from "@/infrastructure/db/test";
 import { createDescriptionController } from "@/presentation/description/description";
@@ -342,14 +341,18 @@ describe("Description API Integration Tests", () => {
     const FailingReaderLive = Layer.succeed(DescriptionReader, {
       findByChannelId: (_query: GetDescriptionsQuery) =>
         Effect.fail(new Error("Database connection failed")),
-      findById: (_query: GetDescriptionContentQuery) =>
+      findContentById: (_query: GetDescriptionContentQuery) =>
         Effect.fail(new Error("Database connection failed")),
     });
 
     const FailingWriterLive = Layer.succeed(DescriptionWriter, {
-      save: (_command: CreateDescriptionCommand) =>
+      create: (_draft: DescriptionDraft) =>
         Effect.fail(new Error("Database connection failed")),
-      softDelete: (_command: DeleteDescriptionCommand) =>
+      update: (_entity: DescriptionActual) =>
+        Effect.fail(new Error("Database connection failed")),
+      softDelete: (_entity: DescriptionActual) =>
+        Effect.fail(new Error("Database connection failed")),
+      findEntityById: (_id: typeof DescriptionId.Type) =>
         Effect.fail(new Error("Database connection failed")),
     });
 

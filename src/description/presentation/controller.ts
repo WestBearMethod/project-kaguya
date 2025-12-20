@@ -1,6 +1,5 @@
 import { Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
-import { AppLayer } from "@/application/layer";
 import {
   CreateDescriptionCommand,
   type DeleteDescriptionCommand,
@@ -15,6 +14,7 @@ import {
 } from "@/description/application/queries";
 import { SaveDescription } from "@/description/application/saveDescription";
 import { Description } from "@/description/domain/entities";
+import { AppLayer } from "@/shared/application/layer";
 import { logCauseInProduction } from "@/shared/logger";
 import { DeleteDescriptionBody, DeleteDescriptionParams } from "./requests";
 import { GetDescriptionsResponse } from "./responses";

@@ -9,7 +9,6 @@ import {
 import { eq } from "drizzle-orm";
 import { Effect, Layer, Schema } from "effect";
 import { Elysia } from "elysia";
-import { AppLayerContext } from "@/application/layer";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import {
@@ -35,6 +34,7 @@ import {
 import type { DescriptionId } from "@/description/domain/valueObjects";
 import { createDescriptionController } from "@/description/presentation/controller";
 import { ErrorSchema } from "@/description/presentation/schemas";
+import { AppLayerContext } from "@/shared/application/layer";
 import { DatabaseService } from "@/shared/infrastructure/db";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
 import {

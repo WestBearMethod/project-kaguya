@@ -34,6 +34,7 @@ import {
 import {
   DescriptionCategory,
   DescriptionContentText,
+  DescriptionCursor,
   type DescriptionId,
   DescriptionTitle,
 } from "@/description/domain/valueObjects";
@@ -62,7 +63,7 @@ const DescriptionSummary = DescriptionSummaryActual.pipe(
 
 const PaginationResponse = Schema.Struct({
   items: Schema.Array(DescriptionSummary),
-  nextCursor: Schema.NullOr(Schema.String),
+  nextCursor: Schema.NullOr(DescriptionCursor),
 });
 
 const createDeleteRequest = (id: string, channelId: string) => {

@@ -67,6 +67,6 @@ export const softDeleteDescription = (
 
     return {
       ...description,
-      deletedAt: new Date(),
+      deletedAt: Schema.decodeSync(AnnotatedDateFromSelf)(new Date()),
     };
   });

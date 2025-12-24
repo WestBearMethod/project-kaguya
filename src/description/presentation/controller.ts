@@ -1,4 +1,4 @@
-import { Effect, Exit, type Layer, Option, Schema } from "effect";
+import { Cause, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import {
   CreateDescriptionCommand,
@@ -14,6 +14,11 @@ import {
 } from "@/description/application/queries";
 import { SaveDescription } from "@/description/application/saveDescription";
 import { Description } from "@/description/domain/entities";
+import {
+  DescriptionAlreadyDeletedError,
+  DescriptionNotFoundError,
+  PermissionDeniedError,
+} from "@/description/domain/errors";
 import { AppLayer } from "@/shared/application/layer";
 import { logCauseInProduction } from "@/shared/logger";
 import { DeleteDescriptionBody, DeleteDescriptionParams } from "./requests";
@@ -143,6 +148,23 @@ export const createDescriptionController = (
         return Exit.match(result, {
           onSuccess: (value) => value,
           onFailure: (cause) => {
+            const failure = Cause.failureOption(cause);
+            if (Option.isSome(failure)) {
+              const error = failure.value;
+              if (error instanceof DescriptionNotFoundError) {
+                set.status = 404;
+                return { error: "Description not found" };
+              }
+              if (error instanceof PermissionDeniedError) {
+                set.status = 403;
+                return { error: "Permission denied" };
+              }
+              if (error instanceof DescriptionAlreadyDeletedError) {
+                set.status = 409;
+                return { error: "Description already deleted" };
+              }
+            }
+
             logCauseInProduction("DELETE /descriptions/:id error:", cause);
             set.status = 500;
             return { error: "Internal Server Error" };
@@ -154,6 +176,9 @@ export const createDescriptionController = (
         body: Schema.standardSchemaV1(DeleteDescriptionBody),
         response: {
           200: Schema.standardSchemaV1(Description),
+          403: Schema.standardSchemaV1(ErrorSchema),
+          404: Schema.standardSchemaV1(ErrorSchema),
+          409: Schema.standardSchemaV1(ErrorSchema),
           500: Schema.standardSchemaV1(ErrorSchema),
         },
       },

@@ -11,6 +11,7 @@ import type {
   Description,
   DescriptionDraft,
 } from "@/description/domain/entities";
+import type { DescriptionDomainError } from "@/description/domain/errors";
 import type { DescriptionId } from "@/description/domain/valueObjects";
 
 /**
@@ -55,7 +56,7 @@ export interface IDescriptionWriter {
    */
   readonly softDelete: (
     entity: Description,
-  ) => Effect.Effect<Description, Error>;
+  ) => Effect.Effect<Description, DescriptionDomainError | Error>;
 
   /**
    * 操作（更新・論理削除）のために ID で Entity を取得する

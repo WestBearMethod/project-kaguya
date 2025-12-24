@@ -2,13 +2,19 @@ import { Context, Effect, Layer, Option } from "effect";
 import type { DeleteDescriptionCommand } from "@/description/application/commands";
 import { DescriptionWriter } from "@/description/application/DescriptionRepository";
 import type { Description } from "@/description/domain/entities";
+import {
+  DescriptionAlreadyDeletedError,
+  type DescriptionDomainError,
+  DescriptionNotFoundError,
+  PermissionDeniedError,
+} from "@/description/domain/errors";
 
 export class DeleteDescription extends Context.Tag("DeleteDescription")<
   DeleteDescription,
   {
     readonly execute: (
       command: DeleteDescriptionCommand,
-    ) => Effect.Effect<Description, Error>;
+    ) => Effect.Effect<Description, DescriptionDomainError | Error>;
   }
 >() {
   static readonly Live = Layer.effect(
@@ -24,18 +30,24 @@ export class DeleteDescription extends Context.Tag("DeleteDescription")<
             );
 
             const description = yield* Option.match(descriptionOption, {
-              onNone: () => Effect.fail(new Error("Description not found")),
+              onNone: () =>
+                Effect.fail(new DescriptionNotFoundError({ id: command.id })),
               onSome: (description) => Effect.succeed(description),
             });
 
             // 2. Business Rule Validation
             if (description.channelId !== command.channelId) {
-              return yield* Effect.fail(new Error("Permission denied"));
+              return yield* Effect.fail(
+                new PermissionDeniedError({
+                  id: command.id,
+                  reason: "Channel ID mismatch",
+                }),
+              );
             }
 
             if (description.deletedAt !== null) {
               return yield* Effect.fail(
-                new Error("Description already deleted"),
+                new DescriptionAlreadyDeletedError({ id: command.id }),
               );
             }
 

@@ -284,7 +284,7 @@ describe("Description API Integration Tests", () => {
       expect(foundDeleted).toBeUndefined();
     });
 
-    it("DELETE /descriptions/:id should return 500 when trying to delete an already deleted description", async () => {
+    it("DELETE /descriptions/:id should return 409 when trying to delete an already deleted description", async () => {
       const created = await createTestDescription();
       const testApp = createTestApp();
 
@@ -294,17 +294,17 @@ describe("Description API Integration Tests", () => {
         createDeleteRequest(created.id, created.channelId),
       );
 
-      expect(secondDeleteResponse.status).toBe(500);
+      expect(secondDeleteResponse.status).toBe(409);
 
       const jsonData = await secondDeleteResponse.json();
       const decoded = await Effect.runPromise(
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe("Description already deleted");
     });
 
-    it("DELETE /descriptions/:id should return 500 when deleting with different channelId (not owned)", async () => {
+    it("DELETE /descriptions/:id should return 403 when deleting with different channelId (not owned)", async () => {
       const created = await createTestDescription();
       const testApp = createTestApp();
 
@@ -314,16 +314,16 @@ describe("Description API Integration Tests", () => {
         createDeleteRequest(created.id, differentChannelId),
       );
 
-      expect(deleteResponse.status).toBe(500);
+      expect(deleteResponse.status).toBe(403);
       const jsonData = await deleteResponse.json();
       const decoded = await Effect.runPromise(
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe("Permission denied");
     });
 
-    it("DELETE /descriptions/:id should return 500 for non-existent description", async () => {
+    it("DELETE /descriptions/:id should return 404 for non-existent description", async () => {
       const fakeId = "00000000-0000-0000-0000-000000000000";
       const testApp = createTestApp();
 
@@ -331,13 +331,13 @@ describe("Description API Integration Tests", () => {
         createDeleteRequest(fakeId, testUser.channelId),
       );
 
-      expect(deleteResponse.status).toBe(500);
+      expect(deleteResponse.status).toBe(404);
       const jsonData = await deleteResponse.json();
       const decoded = await Effect.runPromise(
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe("Description not found");
     });
   });
 

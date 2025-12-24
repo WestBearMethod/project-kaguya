@@ -49,7 +49,7 @@ export const DescriptionCategory = Schema.Literal(
   "MUSIC",
   "EVENT",
   "COLLAB",
-);
+).pipe(Schema.brand("DescriptionCategory"));
 
 export type DescriptionCategory = Schema.Schema.Type<
   typeof DescriptionCategory

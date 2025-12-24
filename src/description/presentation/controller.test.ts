@@ -32,6 +32,7 @@ import {
   type DescriptionDraft,
 } from "@/description/domain/entities";
 import {
+  DescriptionCategory,
   DescriptionContentText,
   type DescriptionId,
   DescriptionTitle,
@@ -492,7 +493,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(Description)(jsonData),
       );
 
-      expect(decoded.category).toBe("GAMING");
+      expect(decoded.category).toBe(
+        Schema.decodeSync(DescriptionCategory)("GAMING"),
+      );
       expect(decoded.channelId).toBe(categoryUser.channelId);
     });
 

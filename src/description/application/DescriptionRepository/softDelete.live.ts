@@ -5,19 +5,15 @@ import { descriptions } from "@/db/schema";
 import type { IDescriptionWriter } from "@/description/application/DescriptionRepository";
 import { Description } from "@/description/domain/entities";
 
-export const makeUpdate =
-  (db: DrizzleDb): IDescriptionWriter["update"] =>
+export const makeSoftDelete =
+  (db: DrizzleDb): IDescriptionWriter["softDelete"] =>
   (entity) =>
     Effect.gen(function* () {
       const result = yield* Effect.tryPromise({
         try: async () => {
-          const [saved] = await db
+          const [deleted] = await db
             .update(descriptions)
-            .set({
-              title: entity.title,
-              content: entity.content,
-              category: entity.category,
-            })
+            .set({ deletedAt: entity.deletedAt })
             .where(
               and(
                 eq(descriptions.id, entity.id),
@@ -26,13 +22,13 @@ export const makeUpdate =
             )
             .returning();
 
-          if (!saved) {
+          if (!deleted) {
             throw new Error(
-              `Description with id ${entity.id} not found for update.`,
+              `Description with id ${entity.id} not found or already deleted for soft delete.`,
             );
           }
 
-          return saved;
+          return deleted;
         },
         catch: (error) => new Error(String(error)),
       });

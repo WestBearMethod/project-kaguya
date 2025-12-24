@@ -7,6 +7,7 @@ import { makeCreate } from "@/description/application/DescriptionRepository/crea
 import { makeFindByChannelId } from "@/description/application/DescriptionRepository/findByChannelId.live";
 import { makeFindContentById } from "@/description/application/DescriptionRepository/findContentById.live";
 import { makeFindEntityById } from "@/description/application/DescriptionRepository/findEntityById.live";
+import { makeSoftDelete } from "@/description/application/DescriptionRepository/softDelete.live";
 import { makeUpdate } from "@/description/application/DescriptionRepository/update.live";
 import { DatabaseService } from "@/shared/infrastructure/db";
 
@@ -25,11 +26,10 @@ export const DescriptionWriterLive = Layer.effect(
   DescriptionWriter,
   Effect.gen(function* () {
     const db = yield* DatabaseService;
-    const update = makeUpdate(db);
     return {
       create: makeCreate(db),
-      update,
-      softDelete: update,
+      update: makeUpdate(db),
+      softDelete: makeSoftDelete(db),
       findEntityById: makeFindEntityById(db),
     };
   }),

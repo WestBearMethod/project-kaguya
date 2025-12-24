@@ -35,6 +35,7 @@ import type { DescriptionId } from "@/description/domain/valueObjects";
 import { createDescriptionController } from "@/description/presentation/controller";
 import { ErrorSchema } from "@/description/presentation/schemas";
 import { AppLayerContext } from "@/shared/application/layer";
+import { ChannelId } from "@/shared/domain/valueObjects";
 import { DatabaseService } from "@/shared/infrastructure/db";
 import { DrizzleServiceLive } from "@/shared/infrastructure/db/DrizzleService.live";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
@@ -95,7 +96,7 @@ describe("Description API Integration Tests", () => {
   };
 
   const testUser = {
-    channelId: "UC_TEST_USER_12345678901",
+    channelId: Schema.decodeSync(ChannelId)("UC_TEST_USER_12345678901"),
   };
 
   const testDescription = {
@@ -356,7 +357,7 @@ describe("Description API Integration Tests", () => {
         Effect.fail(new Error("Database connection failed")),
       softDelete: (_entity: DescriptionActual) =>
         Effect.fail(new Error("Database connection failed")),
-      findEntityById: (_id: typeof DescriptionId.Type) =>
+      findEntityById: (_id: DescriptionId) =>
         Effect.fail(new Error("Database connection failed")),
     });
 
@@ -445,7 +446,7 @@ describe("Description API Integration Tests", () => {
 
   describe("Description API - Category", () => {
     const categoryUser = {
-      channelId: "UC_CATEGORY_TEST_USER_01",
+      channelId: Schema.decodeSync(ChannelId)("UC_CATEGORY_TEST_USER_01"),
     };
 
     const createCategoryRequest = (

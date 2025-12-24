@@ -5,6 +5,7 @@ import { Elysia } from "elysia";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { AppLayerContext } from "@/shared/application/layer";
+import { ChannelId } from "@/shared/domain/valueObjects";
 import { DatabaseService } from "@/shared/infrastructure/db";
 import { DrizzleServiceLive } from "@/shared/infrastructure/db/DrizzleService.live";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
@@ -49,7 +50,7 @@ describe("User API Integration Tests", () => {
   };
 
   const testUser = {
-    channelId: "UC_USER_DELETE_TEST_0001",
+    channelId: Schema.decodeSync(ChannelId)("UC_USER_DELETE_TEST_0001"),
   };
 
   describe("User Soft Delete", () => {
@@ -112,7 +113,9 @@ describe("User API Integration Tests", () => {
 
     it("DELETE /users/:channelId should return 404 for non-existent user", async () => {
       const testApp = createTestApp();
-      const fakeChannelId = "UC_FAKE_USER_99999999999";
+      const fakeChannelId = Schema.decodeSync(ChannelId)(
+        "UC_FAKE_USER_99999999999",
+      );
 
       const deleteResponse = await testApp.handle(
         new Request(`${BASE_URL}/users/${fakeChannelId}`, {
@@ -132,7 +135,7 @@ describe("User API Integration Tests", () => {
     it("DELETE /users/:channelId should return 409 when trying to delete an already deleted user", async () => {
       const testApp = createTestApp();
       const deletedUser = {
-        channelId: "UC_ALREADY_DELETED_USER0",
+        channelId: Schema.decodeSync(ChannelId)("UC_ALREADY_DELETED_USER0"),
       };
 
       // Create and delete user
@@ -169,7 +172,7 @@ describe("User API Integration Tests", () => {
     });
 
     const FailingWriterLive = Layer.succeed(UserWriter, {
-      findEntityByChannelId: (_channelId: string) =>
+      findEntityByChannelId: (_channelId: ChannelId) =>
         Effect.fail(new Error("Database connection failed")),
       softDelete: (_user: User) =>
         Effect.fail(new Error("Database connection failed")),

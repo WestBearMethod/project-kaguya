@@ -21,8 +21,7 @@ export const createUserController = (
       const result = await Effect.gen(function* () {
         const command = yield* Schema.decodeUnknown(DeleteUserCommand)(params);
         const useCase = yield* DeleteUser;
-        const deleted = yield* useCase.execute(command);
-        return yield* Schema.encode(DeleteUserResponse)(deleted);
+        return yield* useCase.execute(command);
       }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
       return Exit.match(result, {

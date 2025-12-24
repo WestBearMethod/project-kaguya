@@ -27,7 +27,7 @@ export interface IUserWriter {
    * 更新・削除操作のために Entity を取得する
    */
   readonly findEntityByChannelId: (
-    channelId: typeof ChannelId.Type,
+    channelId: ChannelId,
   ) => Effect.Effect<Option.Option<User>, Error>;
 
   /**

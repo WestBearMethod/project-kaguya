@@ -1,7 +1,6 @@
 import { Cause, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import { AppLayer } from "@/shared/application/layer";
-import { ErrorMessage } from "@/shared/domain/primitives";
 import { logCauseInProduction } from "@/shared/logger";
 import { ErrorSchema } from "@/shared/presentation/schemas";
 import { DeleteUserCommand } from "@/user/application/commands";
@@ -33,13 +32,13 @@ export const createUserController = (
             if (error.value instanceof UserNotFoundError) {
               set.status = 404;
               return Schema.decodeSync(ErrorSchema)({
-                error: Schema.decodeSync(ErrorMessage)("User Not Found"),
+                error: "User Not Found",
               });
             }
             if (error.value instanceof UserAlreadyDeletedError) {
               set.status = 409;
               return Schema.decodeSync(ErrorSchema)({
-                error: Schema.decodeSync(ErrorMessage)("User Already Deleted"),
+                error: "User Already Deleted",
               });
             }
           }
@@ -47,7 +46,7 @@ export const createUserController = (
           logCauseInProduction("DELETE /users/:channelId error:", cause);
           set.status = 500;
           return Schema.decodeSync(ErrorSchema)({
-            error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+            error: "Internal Server Error",
           });
         },
       });

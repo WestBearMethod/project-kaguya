@@ -2,7 +2,7 @@ import { Cause, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import {
   CreateDescriptionCommand,
-  type DeleteDescriptionCommand,
+  DeleteDescriptionCommand,
 } from "@/description/application/commands";
 import { DeleteDescription } from "@/description/application/deleteDescription";
 import { DescriptionContent } from "@/description/application/dtos";
@@ -20,7 +20,6 @@ import {
   PermissionDeniedError,
 } from "@/description/domain/errors";
 import { AppLayer } from "@/shared/application/layer";
-import { ErrorMessage } from "@/shared/domain/primitives";
 import { logCauseInProduction } from "@/shared/logger";
 import { ErrorSchema } from "@/shared/presentation/schemas";
 import { DeleteDescriptionBody, DeleteDescriptionParams } from "./requests";
@@ -51,7 +50,7 @@ export const createDescriptionController = (
             logCauseInProduction("POST /descriptions error:", cause);
             set.status = 500;
             return Schema.decodeSync(ErrorSchema)({
-              error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+              error: "Internal Server Error",
             });
           },
         });
@@ -82,7 +81,7 @@ export const createDescriptionController = (
             logCauseInProduction("GET /descriptions error:", cause);
             set.status = 500;
             return Schema.decodeSync(ErrorSchema)({
-              error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+              error: "Internal Server Error",
             });
           },
         });
@@ -115,7 +114,7 @@ export const createDescriptionController = (
               onNone: () => {
                 set.status = 404;
                 return Schema.decodeSync(ErrorSchema)({
-                  error: Schema.decodeSync(ErrorMessage)("Not found"),
+                  error: "Not found",
                 });
               },
             }),
@@ -123,7 +122,7 @@ export const createDescriptionController = (
             logCauseInProduction("GET /descriptions/:id/content error:", cause);
             set.status = 500;
             return Schema.decodeSync(ErrorSchema)({
-              error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+              error: "Internal Server Error",
             });
           },
         });
@@ -142,10 +141,10 @@ export const createDescriptionController = (
       async ({ params, body, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* DeleteDescription;
-          const command: DeleteDescriptionCommand = {
+          const command = Schema.decodeSync(DeleteDescriptionCommand)({
             id: params.id,
             channelId: body.channelId,
-          };
+          });
           return yield* useCase.execute(command);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
@@ -158,23 +157,19 @@ export const createDescriptionController = (
               if (error instanceof DescriptionNotFoundError) {
                 set.status = 404;
                 return Schema.decodeSync(ErrorSchema)({
-                  error: Schema.decodeSync(ErrorMessage)(
-                    "Description not found",
-                  ),
+                  error: "Description not found",
                 });
               }
               if (error instanceof PermissionDeniedError) {
                 set.status = 403;
                 return Schema.decodeSync(ErrorSchema)({
-                  error: Schema.decodeSync(ErrorMessage)("Permission denied"),
+                  error: "Permission denied",
                 });
               }
               if (error instanceof DescriptionAlreadyDeletedError) {
                 set.status = 409;
                 return Schema.decodeSync(ErrorSchema)({
-                  error: Schema.decodeSync(ErrorMessage)(
-                    "Description already deleted",
-                  ),
+                  error: "Description already deleted",
                 });
               }
             }
@@ -182,7 +177,7 @@ export const createDescriptionController = (
             logCauseInProduction("DELETE /descriptions/:id error:", cause);
             set.status = 500;
             return Schema.decodeSync(ErrorSchema)({
-              error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+              error: "Internal Server Error",
             });
           },
         });

@@ -1,18 +1,22 @@
-import { type Effect, type ParseResult, Schema } from "effect";
+import { type Brand, type Effect, type ParseResult, Schema } from "effect";
 import { AnnotatedDateFromSelf } from "@/shared/domain/primitives";
 import { ChannelId, UserId } from "@/shared/domain/valueObjects";
 
 /**
  * User Entity: The core domain entity representing a User
  */
-export const User = Schema.Struct({
+export const UserStruct = Schema.Struct({
   id: UserId,
   channelId: ChannelId,
   deletedAt: Schema.NullOr(AnnotatedDateFromSelf),
 });
 
+export const User = UserStruct.pipe(Schema.brand("User"));
+
 // Type definition inferred from schema
-export interface User extends Schema.Schema.Type<typeof User> {}
+export interface User
+  extends Schema.Schema.Type<typeof User>,
+    Brand.Brand<"User"> {}
 
 /**
  * Domain Logic: Check if the user is already deleted

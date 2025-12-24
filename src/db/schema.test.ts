@@ -10,7 +10,7 @@ import {
 import { eq } from "drizzle-orm";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
-import { setupTestDb } from "@/infrastructure/db/test";
+import { setupTestDb } from "@/shared/infrastructure/db.test";
 
 describe("Foreign Key Constraints - CASCADE", () => {
   let db: DrizzleDb;

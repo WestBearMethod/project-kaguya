@@ -8,7 +8,7 @@ import type { DescriptionId } from "@/description/domain/valueObjects";
 
 export const makeFindEntityById =
   (db: DrizzleDb): IDescriptionWriter["findEntityById"] =>
-  (id: typeof DescriptionId.Type) =>
+  (id: DescriptionId) =>
     Effect.gen(function* () {
       const maybeResult = yield* Effect.tryPromise({
         try: async () => {

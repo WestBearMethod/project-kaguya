@@ -62,7 +62,7 @@ export interface IDescriptionWriter {
    * 操作（更新・論理削除）のために ID で Entity を取得する
    */
   readonly findEntityById: (
-    id: typeof DescriptionId.Type,
+    id: DescriptionId,
   ) => Effect.Effect<Option.Option<Description>, Error>;
 }
 

@@ -41,8 +41,7 @@ export const createDescriptionController = (
       async ({ body, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* SaveDescription;
-          const description = yield* useCase.execute(body);
-          return yield* Schema.encode(Description)(description);
+          return yield* useCase.execute(body);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -68,10 +67,10 @@ export const createDescriptionController = (
         const result = await Effect.gen(function* () {
           const useCase = yield* GetDescriptions;
           const summary = yield* useCase.execute(query);
-          return yield* Schema.encode(GetDescriptionsResponse)({
+          return {
             items: summary.items,
             nextCursor: summary.nextCursor,
-          });
+          };
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -141,8 +140,7 @@ export const createDescriptionController = (
             id: params.id,
             channelId: body.channelId,
           };
-          const description = yield* useCase.execute(command);
-          return yield* Schema.encode(Description)(description);
+          return yield* useCase.execute(command);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {

@@ -5,6 +5,7 @@ import { Schema } from "effect";
  * These represent the fundamental building blocks of the Description domain.
  */
 export const DescriptionId = Schema.UUID.pipe(
+  Schema.brand("DescriptionId"),
   Schema.annotations({
     jsonSchema: {
       format: "uuid",
@@ -14,6 +15,8 @@ export const DescriptionId = Schema.UUID.pipe(
     },
   }),
 );
+
+export type DescriptionId = Schema.Schema.Type<typeof DescriptionId>;
 
 export const DescriptionTitle = Schema.String.pipe(
   Schema.minLength(1),

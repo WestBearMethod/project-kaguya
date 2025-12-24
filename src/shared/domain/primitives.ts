@@ -17,3 +17,6 @@ export const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
 export type AnnotatedDateFromSelf = Schema.Schema.Type<
   typeof AnnotatedDateFromSelf
 >;
+
+export const ErrorMessage = Schema.String.pipe(Schema.brand("ErrorMessage"));
+export type ErrorMessage = Schema.Schema.Type<typeof ErrorMessage>;

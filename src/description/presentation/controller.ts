@@ -20,10 +20,11 @@ import {
   PermissionDeniedError,
 } from "@/description/domain/errors";
 import { AppLayer } from "@/shared/application/layer";
+import { ErrorMessage } from "@/shared/domain/primitives";
 import { logCauseInProduction } from "@/shared/logger";
+import { ErrorSchema } from "@/shared/presentation/schemas";
 import { DeleteDescriptionBody, DeleteDescriptionParams } from "./requests";
 import { GetDescriptionsResponse } from "./responses";
-import { ErrorSchema } from "./schemas";
 
 export const createDescriptionController = (
   appLayer: Layer.Layer<
@@ -49,7 +50,9 @@ export const createDescriptionController = (
           onFailure: (cause) => {
             logCauseInProduction("POST /descriptions error:", cause);
             set.status = 500;
-            return { error: "Internal Server Error" };
+            return Schema.decodeSync(ErrorSchema)({
+              error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+            });
           },
         });
       },
@@ -67,10 +70,10 @@ export const createDescriptionController = (
         const result = await Effect.gen(function* () {
           const useCase = yield* GetDescriptions;
           const summary = yield* useCase.execute(query);
-          return {
+          return Schema.decodeSync(GetDescriptionsResponse)({
             items: summary.items,
             nextCursor: summary.nextCursor,
-          };
+          });
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -78,7 +81,9 @@ export const createDescriptionController = (
           onFailure: (cause) => {
             logCauseInProduction("GET /descriptions error:", cause);
             set.status = 500;
-            return { error: "Internal Server Error" };
+            return Schema.decodeSync(ErrorSchema)({
+              error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+            });
           },
         });
       },
@@ -109,13 +114,17 @@ export const createDescriptionController = (
               onSome: (content) => content,
               onNone: () => {
                 set.status = 404;
-                return { error: "Not found" };
+                return Schema.decodeSync(ErrorSchema)({
+                  error: Schema.decodeSync(ErrorMessage)("Not found"),
+                });
               },
             }),
           onFailure: (cause) => {
             logCauseInProduction("GET /descriptions/:id/content error:", cause);
             set.status = 500;
-            return { error: "Internal Server Error" };
+            return Schema.decodeSync(ErrorSchema)({
+              error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+            });
           },
         });
       },
@@ -148,21 +157,33 @@ export const createDescriptionController = (
               const error = failure.value;
               if (error instanceof DescriptionNotFoundError) {
                 set.status = 404;
-                return { error: "Description not found" };
+                return Schema.decodeSync(ErrorSchema)({
+                  error: Schema.decodeSync(ErrorMessage)(
+                    "Description not found",
+                  ),
+                });
               }
               if (error instanceof PermissionDeniedError) {
                 set.status = 403;
-                return { error: "Permission denied" };
+                return Schema.decodeSync(ErrorSchema)({
+                  error: Schema.decodeSync(ErrorMessage)("Permission denied"),
+                });
               }
               if (error instanceof DescriptionAlreadyDeletedError) {
                 set.status = 409;
-                return { error: "Description already deleted" };
+                return Schema.decodeSync(ErrorSchema)({
+                  error: Schema.decodeSync(ErrorMessage)(
+                    "Description already deleted",
+                  ),
+                });
               }
             }
 
             logCauseInProduction("DELETE /descriptions/:id error:", cause);
             set.status = 500;
-            return { error: "Internal Server Error" };
+            return Schema.decodeSync(ErrorSchema)({
+              error: Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+            });
           },
         });
       },

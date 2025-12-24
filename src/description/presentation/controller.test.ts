@@ -39,12 +39,13 @@ import {
   DescriptionTitle,
 } from "@/description/domain/valueObjects";
 import { createDescriptionController } from "@/description/presentation/controller";
-import { ErrorSchema } from "@/description/presentation/schemas";
 import { AppLayerContext } from "@/shared/application/layer";
+import { ErrorMessage } from "@/shared/domain/primitives";
 import { ChannelId } from "@/shared/domain/valueObjects";
 import { DatabaseService } from "@/shared/infrastructure/db";
 import { DrizzleServiceLive } from "@/shared/infrastructure/db/DrizzleService.live";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
+import { ErrorSchema } from "@/shared/presentation/schemas";
 import {
   replaceDateForTest,
   replaceNullableDateForTest,
@@ -310,7 +311,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Description already deleted");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Description already deleted"),
+      );
     });
 
     it("DELETE /descriptions/:id should return 403 when deleting with different channelId (not owned)", async () => {
@@ -329,7 +332,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Permission denied");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Permission denied"),
+      );
     });
 
     it("DELETE /descriptions/:id should return 404 for non-existent description", async () => {
@@ -346,7 +351,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Description not found");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Description not found"),
+      );
     });
   });
 
@@ -396,7 +403,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+      );
     });
 
     it("GET /descriptions should return 500 on error without exposing details", async () => {
@@ -412,7 +421,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+      );
     });
 
     it("DELETE /descriptions/:id should return 500 on error without exposing details", async () => {
@@ -429,7 +440,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+      );
     });
   });
 

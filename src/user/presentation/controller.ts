@@ -21,11 +21,12 @@ export const createUserController = (
       const result = await Effect.gen(function* () {
         const command = yield* Schema.decodeUnknown(DeleteUserCommand)(params);
         const useCase = yield* DeleteUser;
-        return yield* useCase.execute(command);
+        const deletedUser = yield* useCase.execute(command);
+        return yield* Schema.decode(DeleteUserResponse)(deletedUser);
       }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
       return Exit.match(result, {
-        onSuccess: (value) => Schema.decodeSync(DeleteUserResponse)(value),
+        onSuccess: (value) => value,
         onFailure: (cause) => {
           const error = Cause.failureOption(cause);
           if (Option.isSome(error)) {

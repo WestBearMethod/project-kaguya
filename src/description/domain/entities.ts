@@ -1,4 +1,4 @@
-import { Effect, Schema } from "effect";
+import { type Brand, Effect, Schema } from "effect";
 import { AnnotatedDateFromSelf } from "@/shared/domain/primitives";
 import { ChannelId } from "@/shared/domain/valueObjects";
 import {
@@ -15,7 +15,7 @@ import {
 /**
  * Description Entity: The core domain entity representing a YouTube video description
  */
-export const Description = Schema.Struct({
+export const DescriptionStruct = Schema.Struct({
   id: DescriptionId,
   title: DescriptionTitle,
   content: DescriptionContentText,
@@ -25,26 +25,32 @@ export const Description = Schema.Struct({
   deletedAt: Schema.NullOr(AnnotatedDateFromSelf),
 });
 
+export const Description = DescriptionStruct.pipe(Schema.brand("Description"));
+
 // Type definition inferred from schema
-export interface Description extends Schema.Schema.Type<typeof Description> {}
+export interface Description
+  extends Schema.Schema.Type<typeof Description>,
+    Brand.Brand<"Description"> {}
 
 /**
  * DescriptionDraft: Data structure for creating a new Description.
  * It has the same validation rules as Description but without the ID and timestamps.
  */
-export const DescriptionDraft = Description.pipe(
+export const DescriptionDraft = DescriptionStruct.pipe(
   Schema.omit("id", "createdAt", "deletedAt"),
+  Schema.brand("DescriptionDraft"),
 );
 
 export interface DescriptionDraft
-  extends Schema.Schema.Type<typeof DescriptionDraft> {}
+  extends Schema.Schema.Type<typeof DescriptionDraft>,
+    Brand.Brand<"DescriptionDraft"> {}
 
 export const isDescriptionDeleted = (description: Description): boolean =>
   description.deletedAt !== null;
 
 export const softDeleteDescription = (
   description: Description,
-  requestChannelId: typeof ChannelId.Type,
+  requestChannelId: ChannelId,
 ): Effect.Effect<
   Description,
   PermissionDeniedError | DescriptionAlreadyDeletedError
@@ -65,8 +71,8 @@ export const softDeleteDescription = (
       );
     }
 
-    return {
+    return Schema.decodeSync(Description)({
       ...description,
-      deletedAt: new Date(),
-    };
+      deletedAt: Schema.decodeSync(AnnotatedDateFromSelf)(new Date()),
+    });
   });

@@ -5,9 +5,12 @@ import { Elysia } from "elysia";
 import type { DrizzleDb } from "@/db";
 import { descriptions, users } from "@/db/schema";
 import { AppLayerContext } from "@/shared/application/layer";
+import { ErrorMessage } from "@/shared/domain/primitives";
+import { ChannelId } from "@/shared/domain/valueObjects";
 import { DatabaseService } from "@/shared/infrastructure/db";
 import { DrizzleServiceLive } from "@/shared/infrastructure/db/DrizzleService.live";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
+import { ErrorSchema } from "@/shared/presentation/schemas";
 import { replaceDateForTest } from "@/shared/test-utils/schema";
 import { DeleteUser } from "@/user/application/deleteUser";
 import type { GetUserByChannelIdQuery } from "@/user/application/queries";
@@ -15,7 +18,6 @@ import { UserReader, UserWriter } from "@/user/application/UserRepository";
 import type { User } from "@/user/domain/entities";
 import { createUserController } from "@/user/presentation/controller";
 import { DeleteUserResponse as DeleteUserResponseActual } from "@/user/presentation/responses";
-import { ErrorSchema } from "@/user/presentation/schemas";
 
 const BASE_URL = "http://localhost";
 
@@ -49,7 +51,7 @@ describe("User API Integration Tests", () => {
   };
 
   const testUser = {
-    channelId: "UC_USER_DELETE_TEST_0001",
+    channelId: Schema.decodeSync(ChannelId)("UC_USER_DELETE_TEST_0001"),
   };
 
   describe("User Soft Delete", () => {
@@ -112,7 +114,9 @@ describe("User API Integration Tests", () => {
 
     it("DELETE /users/:channelId should return 404 for non-existent user", async () => {
       const testApp = createTestApp();
-      const fakeChannelId = "UC_FAKE_USER_99999999999";
+      const fakeChannelId = Schema.decodeSync(ChannelId)(
+        "UC_FAKE_USER_99999999999",
+      );
 
       const deleteResponse = await testApp.handle(
         new Request(`${BASE_URL}/users/${fakeChannelId}`, {
@@ -126,13 +130,15 @@ describe("User API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("User Not Found");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("User Not Found"),
+      );
     });
 
     it("DELETE /users/:channelId should return 409 when trying to delete an already deleted user", async () => {
       const testApp = createTestApp();
       const deletedUser = {
-        channelId: "UC_ALREADY_DELETED_USER0",
+        channelId: Schema.decodeSync(ChannelId)("UC_ALREADY_DELETED_USER0"),
       };
 
       // Create and delete user
@@ -158,7 +164,9 @@ describe("User API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("User Already Deleted");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("User Already Deleted"),
+      );
     });
   });
 
@@ -169,7 +177,7 @@ describe("User API Integration Tests", () => {
     });
 
     const FailingWriterLive = Layer.succeed(UserWriter, {
-      findEntityByChannelId: (_channelId: string) =>
+      findEntityByChannelId: (_channelId: ChannelId) =>
         Effect.fail(new Error("Database connection failed")),
       softDelete: (_user: User) =>
         Effect.fail(new Error("Database connection failed")),
@@ -195,7 +203,9 @@ describe("User API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+      );
     });
   });
 });

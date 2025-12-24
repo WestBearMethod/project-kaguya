@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { Effect, Option } from "effect";
+import { Effect, Option, Schema } from "effect";
+import { DescriptionCursor } from "@/description/domain/valueObjects";
 import { decodeCursor, encodeCursor } from "./utils";
 
 describe("Description Utils", () => {
@@ -13,7 +14,7 @@ describe("Description Utils", () => {
       const expectedOriginal = `${date.toISOString()}_${id}`;
       const expected = Buffer.from(expectedOriginal).toString("base64");
 
-      expect(cursor).toBe(expected);
+      expect(cursor).toBe(Schema.decodeSync(DescriptionCursor)(expected));
     });
   });
 
@@ -44,14 +45,10 @@ describe("Description Utils", () => {
       expect(Option.isNone(resultUndefined[1])).toBe(true);
     });
 
-    it("should return None for invalid base64 string", async () => {
-      const result = await Effect.runPromise(decodeCursor("invalid-base64!"));
-      expect(Option.isNone(result[0])).toBe(true);
-      expect(Option.isNone(result[1])).toBe(true);
-    });
-
     it("should return None for cursor with invalid format (no underscore)", async () => {
-      const cursor = Buffer.from("just-a-string").toString("base64");
+      const cursor = Schema.decodeSync(DescriptionCursor)(
+        Buffer.from("just-a-string").toString("base64"),
+      );
       const result = await Effect.runPromise(decodeCursor(cursor));
 
       // The implementation splits by "_". "just-a-string" has no underscore,
@@ -62,7 +59,9 @@ describe("Description Utils", () => {
     });
 
     it("should return None for cursor with invalid date", async () => {
-      const cursor = Buffer.from("invalid-date_some-id").toString("base64");
+      const cursor = Schema.decodeSync(DescriptionCursor)(
+        Buffer.from("invalid-date_some-id").toString("base64"),
+      );
       const result = await Effect.runPromise(decodeCursor(cursor));
 
       expect(Option.isNone(result[0])).toBe(true);

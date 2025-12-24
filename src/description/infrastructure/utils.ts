@@ -1,6 +1,7 @@
-import { Effect, Option } from "effect";
+import { Effect, Option, Schema } from "effect";
+import { DescriptionCursor } from "@/description/domain/valueObjects";
 
-export const decodeCursor = (cursor: string | undefined | null) =>
+export const decodeCursor = (cursor: DescriptionCursor | undefined | null) =>
   Effect.gen(function* () {
     if (!cursor) {
       return [Option.none(), Option.none()] as const;
@@ -34,7 +35,9 @@ export const decodeCursor = (cursor: string | undefined | null) =>
 export const encodeCursor = (cursor: {
   readonly createdAt: Date;
   readonly id: string;
-}): string => {
+}): DescriptionCursor => {
   const cursorValue = `${cursor.createdAt.toISOString()}_${cursor.id}`;
-  return Buffer.from(cursorValue).toString("base64");
+  return Schema.decodeSync(DescriptionCursor)(
+    Buffer.from(cursorValue).toString("base64"),
+  );
 };

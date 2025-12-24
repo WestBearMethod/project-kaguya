@@ -11,4 +11,12 @@ export const AnnotatedDateFromSelf = Schema.DateFromSelf.pipe(
       format: "date-time", // Indicates ISO 8601 format
     },
   }),
+  Schema.brand("AnnotatedDateFromSelf"),
 );
+
+export type AnnotatedDateFromSelf = Schema.Schema.Type<
+  typeof AnnotatedDateFromSelf
+>;
+
+export const ErrorMessage = Schema.String.pipe(Schema.brand("ErrorMessage"));
+export type ErrorMessage = Schema.Schema.Type<typeof ErrorMessage>;

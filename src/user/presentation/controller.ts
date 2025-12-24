@@ -2,6 +2,7 @@ import { Cause, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import { AppLayer } from "@/shared/application/layer";
 import { logCauseInProduction } from "@/shared/logger";
+import { ErrorSchema } from "@/shared/presentation/schemas";
 import { DeleteUserCommand } from "@/user/application/commands";
 import { DeleteUser } from "@/user/application/deleteUser";
 import {
@@ -10,7 +11,6 @@ import {
 } from "@/user/domain/errors";
 import { DeleteUserParams } from "@/user/presentation/requests";
 import { DeleteUserResponse } from "@/user/presentation/responses";
-import { ErrorSchema } from "@/user/presentation/schemas";
 
 export const createUserController = (
   appLayer: Layer.Layer<DeleteUser, never, never>,
@@ -21,8 +21,8 @@ export const createUserController = (
       const result = await Effect.gen(function* () {
         const command = yield* Schema.decodeUnknown(DeleteUserCommand)(params);
         const useCase = yield* DeleteUser;
-        const deleted = yield* useCase.execute(command);
-        return yield* Schema.encode(DeleteUserResponse)(deleted);
+        const deletedUser = yield* useCase.execute(command);
+        return yield* Schema.decode(DeleteUserResponse)(deletedUser);
       }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
       return Exit.match(result, {
@@ -32,17 +32,23 @@ export const createUserController = (
           if (Option.isSome(error)) {
             if (error.value instanceof UserNotFoundError) {
               set.status = 404;
-              return { error: "User Not Found" };
+              return Schema.decodeSync(ErrorSchema)({
+                error: "User Not Found",
+              });
             }
             if (error.value instanceof UserAlreadyDeletedError) {
               set.status = 409;
-              return { error: "User Already Deleted" };
+              return Schema.decodeSync(ErrorSchema)({
+                error: "User Already Deleted",
+              });
             }
           }
 
           logCauseInProduction("DELETE /users/:channelId error:", cause);
           set.status = 500;
-          return { error: "Internal Server Error" };
+          return Schema.decodeSync(ErrorSchema)({
+            error: "Internal Server Error",
+          });
         },
       });
     },

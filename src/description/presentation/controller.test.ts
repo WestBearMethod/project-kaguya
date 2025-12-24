@@ -31,13 +31,21 @@ import {
   Description as DescriptionActual,
   type DescriptionDraft,
 } from "@/description/domain/entities";
-import type { DescriptionId } from "@/description/domain/valueObjects";
+import {
+  DescriptionCategory,
+  DescriptionContentText,
+  DescriptionCursor,
+  type DescriptionId,
+  DescriptionTitle,
+} from "@/description/domain/valueObjects";
 import { createDescriptionController } from "@/description/presentation/controller";
-import { ErrorSchema } from "@/description/presentation/schemas";
 import { AppLayerContext } from "@/shared/application/layer";
+import { ErrorMessage } from "@/shared/domain/primitives";
+import { ChannelId } from "@/shared/domain/valueObjects";
 import { DatabaseService } from "@/shared/infrastructure/db";
 import { DrizzleServiceLive } from "@/shared/infrastructure/db/DrizzleService.live";
 import { setupTestDb } from "@/shared/infrastructure/db.test";
+import { ErrorSchema } from "@/shared/presentation/schemas";
 import {
   replaceDateForTest,
   replaceNullableDateForTest,
@@ -56,7 +64,7 @@ const DescriptionSummary = DescriptionSummaryActual.pipe(
 
 const PaginationResponse = Schema.Struct({
   items: Schema.Array(DescriptionSummary),
-  nextCursor: Schema.NullOr(Schema.String),
+  nextCursor: Schema.NullOr(DescriptionCursor),
 });
 
 const createDeleteRequest = (id: string, channelId: string) => {
@@ -95,12 +103,14 @@ describe("Description API Integration Tests", () => {
   };
 
   const testUser = {
-    channelId: "UC_TEST_USER_12345678901",
+    channelId: Schema.decodeSync(ChannelId)("UC_TEST_USER_12345678901"),
   };
 
   const testDescription = {
-    title: "Test Video",
-    content: "This is a test description.",
+    title: Schema.decodeSync(DescriptionTitle)("Test Video"),
+    content: Schema.decodeSync(DescriptionContentText)(
+      "This is a test description.",
+    ),
     channelId: testUser.channelId,
   };
 
@@ -301,7 +311,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Description already deleted");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Description already deleted"),
+      );
     });
 
     it("DELETE /descriptions/:id should return 403 when deleting with different channelId (not owned)", async () => {
@@ -320,7 +332,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Permission denied");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Permission denied"),
+      );
     });
 
     it("DELETE /descriptions/:id should return 404 for non-existent description", async () => {
@@ -337,7 +351,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Description not found");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Description not found"),
+      );
     });
   });
 
@@ -356,7 +372,7 @@ describe("Description API Integration Tests", () => {
         Effect.fail(new Error("Database connection failed")),
       softDelete: (_entity: DescriptionActual) =>
         Effect.fail(new Error("Database connection failed")),
-      findEntityById: (_id: typeof DescriptionId.Type) =>
+      findEntityById: (_id: DescriptionId) =>
         Effect.fail(new Error("Database connection failed")),
     });
 
@@ -387,7 +403,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+      );
     });
 
     it("GET /descriptions should return 500 on error without exposing details", async () => {
@@ -403,7 +421,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+      );
     });
 
     it("DELETE /descriptions/:id should return 500 on error without exposing details", async () => {
@@ -420,7 +440,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(ErrorSchema)(jsonData),
       );
 
-      expect(decoded.error).toBe("Internal Server Error");
+      expect(decoded.error).toBe(
+        Schema.decodeSync(ErrorMessage)("Internal Server Error"),
+      );
     });
   });
 
@@ -445,7 +467,7 @@ describe("Description API Integration Tests", () => {
 
   describe("Description API - Category", () => {
     const categoryUser = {
-      channelId: "UC_CATEGORY_TEST_USER_01",
+      channelId: Schema.decodeSync(ChannelId)("UC_CATEGORY_TEST_USER_01"),
     };
 
     const createCategoryRequest = (
@@ -458,8 +480,10 @@ describe("Description API Integration Tests", () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: "Category Test Video",
-          content: "Testing category feature",
+          title: Schema.decodeSync(DescriptionTitle)("Category Test Video"),
+          content: Schema.decodeSync(DescriptionContentText)(
+            "Testing category feature",
+          ),
           channelId,
           category,
         }),
@@ -483,7 +507,9 @@ describe("Description API Integration Tests", () => {
         Schema.decodeUnknown(Description)(jsonData),
       );
 
-      expect(decoded.category).toBe("GAMING");
+      expect(decoded.category).toBe(
+        Schema.decodeSync(DescriptionCategory)("GAMING"),
+      );
       expect(decoded.channelId).toBe(categoryUser.channelId);
     });
 

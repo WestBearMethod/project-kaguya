@@ -2,7 +2,7 @@ import { Cause, Effect, Exit, type Layer, Option, Schema } from "effect";
 import { Elysia } from "elysia";
 import {
   CreateDescriptionCommand,
-  type DeleteDescriptionCommand,
+  DeleteDescriptionCommand,
 } from "@/description/application/commands";
 import { DeleteDescription } from "@/description/application/deleteDescription";
 import { DescriptionContent } from "@/description/application/dtos";
@@ -21,9 +21,9 @@ import {
 } from "@/description/domain/errors";
 import { AppLayer } from "@/shared/application/layer";
 import { logCauseInProduction } from "@/shared/logger";
+import { ErrorSchema } from "@/shared/presentation/schemas";
 import { DeleteDescriptionBody, DeleteDescriptionParams } from "./requests";
 import { GetDescriptionsResponse } from "./responses";
-import { ErrorSchema } from "./schemas";
 
 export const createDescriptionController = (
   appLayer: Layer.Layer<
@@ -42,7 +42,7 @@ export const createDescriptionController = (
         const result = await Effect.gen(function* () {
           const useCase = yield* SaveDescription;
           const description = yield* useCase.execute(body);
-          return yield* Schema.encode(Description)(description);
+          return yield* Schema.decode(Description)(description);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -50,7 +50,9 @@ export const createDescriptionController = (
           onFailure: (cause) => {
             logCauseInProduction("POST /descriptions error:", cause);
             set.status = 500;
-            return { error: "Internal Server Error" };
+            return Schema.decodeSync(ErrorSchema)({
+              error: "Internal Server Error",
+            });
           },
         });
       },
@@ -68,7 +70,7 @@ export const createDescriptionController = (
         const result = await Effect.gen(function* () {
           const useCase = yield* GetDescriptions;
           const summary = yield* useCase.execute(query);
-          return yield* Schema.encode(GetDescriptionsResponse)({
+          return yield* Schema.decode(GetDescriptionsResponse)({
             items: summary.items,
             nextCursor: summary.nextCursor,
           });
@@ -79,7 +81,9 @@ export const createDescriptionController = (
           onFailure: (cause) => {
             logCauseInProduction("GET /descriptions error:", cause);
             set.status = 500;
-            return { error: "Internal Server Error" };
+            return Schema.decodeSync(ErrorSchema)({
+              error: "Internal Server Error",
+            });
           },
         });
       },
@@ -101,7 +105,7 @@ export const createDescriptionController = (
           return yield* Option.match(optionContent, {
             onNone: () => Effect.succeed(Option.none()),
             onSome: (content) =>
-              Schema.encode(DescriptionContent)(content).pipe(
+              Schema.decode(DescriptionContent)(content).pipe(
                 Effect.map(Option.some),
               ),
           });
@@ -113,13 +117,17 @@ export const createDescriptionController = (
               onSome: (content) => content,
               onNone: () => {
                 set.status = 404;
-                return { error: "Not found" };
+                return Schema.decodeSync(ErrorSchema)({
+                  error: "Not found",
+                });
               },
             }),
           onFailure: (cause) => {
             logCauseInProduction("GET /descriptions/:id/content error:", cause);
             set.status = 500;
-            return { error: "Internal Server Error" };
+            return Schema.decodeSync(ErrorSchema)({
+              error: "Internal Server Error",
+            });
           },
         });
       },
@@ -137,12 +145,12 @@ export const createDescriptionController = (
       async ({ params, body, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* DeleteDescription;
-          const command: DeleteDescriptionCommand = {
+          const command = Schema.decodeSync(DeleteDescriptionCommand)({
             id: params.id,
             channelId: body.channelId,
-          };
+          });
           const description = yield* useCase.execute(command);
-          return yield* Schema.encode(Description)(description);
+          return yield* Schema.decode(Description)(description);
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 
         return Exit.match(result, {
@@ -153,21 +161,29 @@ export const createDescriptionController = (
               const error = failure.value;
               if (error instanceof DescriptionNotFoundError) {
                 set.status = 404;
-                return { error: "Description not found" };
+                return Schema.decodeSync(ErrorSchema)({
+                  error: "Description not found",
+                });
               }
               if (error instanceof PermissionDeniedError) {
                 set.status = 403;
-                return { error: "Permission denied" };
+                return Schema.decodeSync(ErrorSchema)({
+                  error: "Permission denied",
+                });
               }
               if (error instanceof DescriptionAlreadyDeletedError) {
                 set.status = 409;
-                return { error: "Description already deleted" };
+                return Schema.decodeSync(ErrorSchema)({
+                  error: "Description already deleted",
+                });
               }
             }
 
             logCauseInProduction("DELETE /descriptions/:id error:", cause);
             set.status = 500;
-            return { error: "Internal Server Error" };
+            return Schema.decodeSync(ErrorSchema)({
+              error: "Internal Server Error",
+            });
           },
         });
       },

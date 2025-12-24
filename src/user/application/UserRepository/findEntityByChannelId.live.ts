@@ -8,7 +8,7 @@ import { User } from "@/user/domain/entities";
 
 export const makeFindEntityByChannelId =
   (service: IDrizzleService): IUserWriter["findEntityByChannelId"] =>
-  (channelId: typeof ChannelId.Type) =>
+  (channelId: ChannelId) =>
     Effect.gen(function* () {
       const maybeResult = yield* service.run(async (db) => {
         const [result] = await db

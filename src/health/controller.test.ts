@@ -1,13 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { Effect, Schema } from "effect";
 import { Elysia } from "elysia";
-import { healthController } from "@/health/controller";
+import { HealthResponse, healthController } from "@/health/controller";
 
 const BASE_URL = "http://localhost";
-
-const HealthResponse = Schema.Struct({
-  status: Schema.Literal("ok"),
-});
 
 describe("Health API", () => {
   const testApp = new Elysia().use(healthController);

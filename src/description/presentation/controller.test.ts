@@ -31,7 +31,11 @@ import {
   Description as DescriptionActual,
   type DescriptionDraft,
 } from "@/description/domain/entities";
-import type { DescriptionId } from "@/description/domain/valueObjects";
+import {
+  DescriptionContentText,
+  type DescriptionId,
+  DescriptionTitle,
+} from "@/description/domain/valueObjects";
 import { createDescriptionController } from "@/description/presentation/controller";
 import { ErrorSchema } from "@/description/presentation/schemas";
 import { AppLayerContext } from "@/shared/application/layer";
@@ -100,8 +104,10 @@ describe("Description API Integration Tests", () => {
   };
 
   const testDescription = {
-    title: "Test Video",
-    content: "This is a test description.",
+    title: Schema.decodeSync(DescriptionTitle)("Test Video"),
+    content: Schema.decodeSync(DescriptionContentText)(
+      "This is a test description.",
+    ),
     channelId: testUser.channelId,
   };
 
@@ -459,8 +465,10 @@ describe("Description API Integration Tests", () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: "Category Test Video",
-          content: "Testing category feature",
+          title: Schema.decodeSync(DescriptionTitle)("Category Test Video"),
+          content: Schema.decodeSync(DescriptionContentText)(
+            "Testing category feature",
+          ),
           channelId,
           category,
         }),

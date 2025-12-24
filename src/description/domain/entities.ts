@@ -44,7 +44,7 @@ export const isDescriptionDeleted = (description: Description): boolean =>
 
 export const softDeleteDescription = (
   description: Description,
-  requestChannelId: typeof ChannelId.Type,
+  requestChannelId: ChannelId,
 ): Effect.Effect<
   Description,
   PermissionDeniedError | DescriptionAlreadyDeletedError

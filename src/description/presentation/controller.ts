@@ -99,10 +99,7 @@ export const createDescriptionController = (
 
           return yield* Option.match(optionContent, {
             onNone: () => Effect.succeed(Option.none()),
-            onSome: (content) =>
-              Schema.encode(DescriptionContent)(content).pipe(
-                Effect.map(Option.some),
-              ),
+            onSome: (content) => Effect.succeed(Option.some(content)),
           });
         }).pipe(Effect.provide(appLayer), Effect.runPromiseExit);
 

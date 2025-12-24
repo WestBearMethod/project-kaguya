@@ -1,6 +1,10 @@
-import { Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { AnnotatedDateFromSelf } from "@/shared/domain/primitives";
 import { ChannelId } from "@/shared/domain/valueObjects";
+import {
+  DescriptionAlreadyDeletedError,
+  PermissionDeniedError,
+} from "./errors";
 import {
   DescriptionCategory,
   DescriptionContentText,
@@ -34,3 +38,35 @@ export const DescriptionDraft = Description.pipe(
 
 export interface DescriptionDraft
   extends Schema.Schema.Type<typeof DescriptionDraft> {}
+
+export const isDescriptionDeleted = (description: Description): boolean =>
+  description.deletedAt !== null;
+
+export const softDeleteDescription = (
+  description: Description,
+  requestChannelId: typeof ChannelId.Type,
+): Effect.Effect<
+  Description,
+  PermissionDeniedError | DescriptionAlreadyDeletedError
+> =>
+  Effect.gen(function* () {
+    if (description.channelId !== requestChannelId) {
+      return yield* Effect.fail(
+        new PermissionDeniedError({
+          id: description.id,
+          reason: "Channel ID mismatch",
+        }),
+      );
+    }
+
+    if (isDescriptionDeleted(description)) {
+      return yield* Effect.fail(
+        new DescriptionAlreadyDeletedError({ id: description.id }),
+      );
+    }
+
+    return {
+      ...description,
+      deletedAt: new Date(),
+    };
+  });

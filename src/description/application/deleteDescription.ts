@@ -1,12 +1,13 @@
 import { Context, Effect, Layer, Option } from "effect";
 import type { DeleteDescriptionCommand } from "@/description/application/commands";
 import { DescriptionWriter } from "@/description/application/DescriptionRepository";
-import type { Description } from "@/description/domain/entities";
 import {
-  DescriptionAlreadyDeletedError,
+  type Description,
+  softDeleteDescription,
+} from "@/description/domain/entities";
+import {
   type DescriptionDomainError,
   DescriptionNotFoundError,
-  PermissionDeniedError,
 } from "@/description/domain/errors";
 
 export class DeleteDescription extends Context.Tag("DeleteDescription")<
@@ -35,29 +36,13 @@ export class DeleteDescription extends Context.Tag("DeleteDescription")<
               onSome: (description) => Effect.succeed(description),
             });
 
-            // 2. Business Rule Validation
-            if (description.channelId !== command.channelId) {
-              return yield* Effect.fail(
-                new PermissionDeniedError({
-                  id: command.id,
-                  reason: "Channel ID mismatch",
-                }),
-              );
-            }
+            // 2. Business Rule Validation & State Transition in Memory
+            const deletedDescription = yield* softDeleteDescription(
+              description,
+              command.channelId,
+            );
 
-            if (description.deletedAt !== null) {
-              return yield* Effect.fail(
-                new DescriptionAlreadyDeletedError({ id: command.id }),
-              );
-            }
-
-            // 3. State Transition in Memory
-            const deletedDescription: Description = {
-              ...description,
-              deletedAt: new Date(),
-            };
-
-            // 4. Persistence
+            // 3. Persistence
             return yield* repository.softDelete(deletedDescription);
           }),
       };

@@ -145,7 +145,7 @@ export const createDescriptionController = (
       async ({ params, body, set }) => {
         const result = await Effect.gen(function* () {
           const useCase = yield* DeleteDescription;
-          const command = Schema.decodeSync(DeleteDescriptionCommand)({
+          const command = yield* Schema.decode(DeleteDescriptionCommand)({
             id: params.id,
             channelId: body.channelId,
           });

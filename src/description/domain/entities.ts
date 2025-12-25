@@ -1,4 +1,4 @@
-import { type Brand, Effect, Schema } from "effect";
+import { type Brand, Effect, type ParseResult, Schema } from "effect";
 import { AnnotatedDateFromSelf } from "@/shared/domain/primitives";
 import { ChannelId } from "@/shared/domain/valueObjects";
 import {
@@ -53,7 +53,9 @@ export const softDeleteDescription = (
   requestChannelId: ChannelId,
 ): Effect.Effect<
   Description,
-  PermissionDeniedError | DescriptionAlreadyDeletedError
+  | PermissionDeniedError
+  | DescriptionAlreadyDeletedError
+  | ParseResult.ParseError
 > =>
   Effect.gen(function* () {
     if (description.channelId !== requestChannelId) {
@@ -71,8 +73,8 @@ export const softDeleteDescription = (
       );
     }
 
-    return Schema.decodeSync(Description)({
+    return yield* Schema.decode(Description)({
       ...description,
-      deletedAt: Schema.decodeSync(AnnotatedDateFromSelf)(new Date()),
+      deletedAt: new Date(),
     });
   });

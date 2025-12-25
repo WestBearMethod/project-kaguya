@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Option } from "effect";
+import { Context, Effect, Layer, Option, type ParseResult } from "effect";
 import type { DeleteUserCommand } from "@/user/application/commands";
 import type { DeletedUser } from "@/user/application/dtos";
 import { UserWriter } from "@/user/application/UserRepository";
@@ -14,7 +14,10 @@ export class DeleteUser extends Context.Tag("DeleteUser")<
   {
     readonly execute: (
       command: DeleteUserCommand,
-    ) => Effect.Effect<DeletedUser, UserDomainError | Error>;
+    ) => Effect.Effect<
+      DeletedUser,
+      UserDomainError | ParseResult.ParseError | Error
+    >;
   }
 >() {
   static readonly Live = Layer.effect(

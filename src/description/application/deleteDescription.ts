@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Option } from "effect";
+import { Context, Effect, Layer, Option, type ParseResult } from "effect";
 import type { DeleteDescriptionCommand } from "@/description/application/commands";
 import { DescriptionWriter } from "@/description/application/DescriptionRepository";
 import {
@@ -15,7 +15,10 @@ export class DeleteDescription extends Context.Tag("DeleteDescription")<
   {
     readonly execute: (
       command: DeleteDescriptionCommand,
-    ) => Effect.Effect<Description, DescriptionDomainError | Error>;
+    ) => Effect.Effect<
+      Description,
+      DescriptionDomainError | ParseResult.ParseError | Error
+    >;
   }
 >() {
   static readonly Live = Layer.effect(

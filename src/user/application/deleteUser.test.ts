@@ -79,7 +79,10 @@ describe("DeleteUser Use Case", () => {
   });
 
   it("should fail if user is already deleted", async () => {
-    const deletedUser = { ...mockUser, deletedAt: new Date() } as User;
+    const deletedUser = Schema.decodeSync(User)({
+      ...mockUser,
+      deletedAt: new Date(),
+    });
     const mockWriter: IUserWriter = {
       findEntityByChannelId: () => Effect.succeed(Option.some(deletedUser)),
       softDelete: () => Effect.fail(new Error("Should not be called")),
